@@ -1,0 +1,33 @@
+{
+  "name": "anonymous",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saikat1236/anonymous.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saikat1236/anonymous/issues"
+  },
+  "homepage": "https://github.com/saikat1236/anonymous#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^16.0.1",
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "express-formidable": "^1.2.0",
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "json": "^11.0.0",
+    "mongodb": "^4.9.0",
+    "mongoose": "^6.5.3",
+    "socket.io": "^4.5.1"
+  }
+}
