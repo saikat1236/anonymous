@@ -1,0 +1,55 @@
+<% for(var i = users.length-1; i >= 0 ; i--) { %>
+    <div class="central-meta item">
+        <div class="user-post">
+            <div class="friend-info">
+                <figure>
+                    <img src="/images/logo.jpg" alt="">
+                </figure>
+                <div class="friend-name">
+                    <ins><a href="time-line.html" title="">Anonymous<%=i%></a></ins>
+                    <span>published: june,2 2018 19:PM</span>
+                </div>
+                <div class="description">
+                        
+                        <p>
+                           <%=users[i].post%>
+                        </p>
+                </div>
+                <!-- <div class="post-meta">	 -->
+                    <div class="we-video-info">
+                        <ul>
+                            <li>
+                                <span class="comment" data-toggle="tooltip" title="Comments">
+                                    <i class="fa fa-comments-o"></i>
+                                    <ins>52</ins>
+                                </span>
+                            </li>
+                        </ul>
+
+                    </div>
+                    
+                <!-- </div> -->
+            </div>
+            <hr class="border  ">
+           
+            <div class="coment-area">
+                <ul class="we-comet">
+                    
+
+                        <!-- <%- include('_posts2')%>                    -->
+                    
+                    <li class="post-comment">
+                        <div class="comet-avatar">
+                            <img src="/images/logo.jpg" alt="">
+                        </div>
+                        <div class="post-comt-box">
+                            <%- include('_form2')%>
+                        </div>
+                    </li>
+                </ul>
+            </div> 
+        </div>
+        
+    </div>
+   
+    <% } %>

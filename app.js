@@ -1,67 +1,43 @@
-const express=require("express");
-const { request } = require("http");
-const app=express();
-const mongodb=require("mongodb");
+const express = require("express");
+const dotenv = require("dotenv");
+const morgan = require("morgan");
+const bodyparser = require("body-parser");
+const path = require("path")
+const connectDB = require('./server/database/connection');
+const app = express();
 
-// const dotenv=require("dotenv");
-// const bodyparser = require("body-parser");
-// const path = require("path")
+dotenv.config({path: "config.env"})
+const port = process.env.PORT || 3000
 
-const http=require("http").createServer(app);
-const mongoclient=mongodb.MongoClient;
-const objectid=mongodb.ObjectId;
+//log req
+app.use(morgan("tiny"));
 
-// const connectDB = require('./server/database/connection');
-// // connectDB();
-// dotenv.config({path: "config.env"})
-// const port = process.env.PORT || 3000
-// app.use(bodyparser.urlencoded({extended: true}))
+//moongodb
+connectDB();
 
-app.use("/views",express.static(__dirname+"/views"));
-app.set("view engine","ejs");
+//parse req
+app.use(bodyparser.urlencoded({extended: true}))
+
+// view engine setup
+// app.engine('html', cons.swig)
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'html');
+app.set('view engine', 'ejs');
+
+//load assets
+app.use('/css',express.static(path.resolve(__dirname,"assets/css")))
+app.use('/js',express.static(path.resolve(__dirname,"assets/js")))
+// app.use('/output',express.static(path.resolve(__dirname,"views/output")))
+app.use('/images',express.static(path.resolve(__dirname,"assets/images")))
+app.use('/fonts',express.static(path.resolve(__dirname,"assets/fonts")))
+
+//routes
+app.use('/',require('./server/routes/router'))
 
 
-// app.listen(port,()=>{  // do not add localhost here if you are deploying it
-//     console.log("server listening to port "+port);
-// });
-
-
-var socketio=require("socket.io")(http);
-var socketid="";
-var users=[];
-var mainurl="http://localhost:3000";
-
-socketio.on("connection",function (socket) {
-    console.log("user connected" , socket.id);
-    socketid=socket.id;
+app.listen(port,()=>{  // do not add localhost here if you are deploying it
+    console.log("server listening to port "+port);
 });
-
-http.listen(3000, function() {
-    console.log("server started");
-    
-    mongoclient.connect("mongodb+srv://saikat:Saikat123@cluster0.1t77hko.mongodb.net/test" , function(error,client) {
-        // var database=client.db("anonym");
-        console.log("database connected");
-
-        app.get("/",function(req,res) {
-            result.render("index");
-        });
-        app.post("/addpost",function(req,res) {
-            result.render("index");
-            var caption=request.fields.caption;
-            var _id=request.request.fields._id;
-            database.collection("users").findOne(
-                function(error,user) {
-                    if(user==null){
-                        
-                    }
-                }
-            )
-        });
-              
-    });
-});
-
 
 
 

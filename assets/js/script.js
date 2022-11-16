@@ -99,9 +99,9 @@ $('.notification-box > ul li > i.del').on("click", function(){
 	setTimeout(function() { NProgress.done(); $('.fade').removeClass('out'); }, 2000);
 	
 //--- bootstrap tooltip	
-	$(function () {
-	  $('[data-toggle="tooltip"]').tooltip();
-	});
+	// $(function () {
+	//   $('[data-toggle="tooltip"]').tooltip();
+	// });
 	
 // Sticky Sidebar & header
 	if($(window).width() < 769) {
@@ -153,7 +153,7 @@ if ($.isFunction($.fn.userincr)) {
 if ($.isFunction($.fn.loadMoreResults)) {	
 	$('.loadMore').loadMoreResults({
 		displayedItems: 3,
-		showItems: 1,
+		showItems: 3,
 		button: {
 		  'class': 'btn-load-more',
 		  'text': 'Load More'
@@ -254,32 +254,32 @@ if ($.isFunction($.fn.loadMoreResults)) {
 	
 //---- responsive header
 	
-$(function() {
+// $(function() {
 
-	//	create the menus
-	$('#menu').mmenu();
-	$('#shoppingbag').mmenu({
-		navbar: {
-			title: 'General Setting'
-		},
-		offCanvas: {
-			position: 'right'
-		}
-	});
+// 	//	create the menus
+// 	// $('#menu').menu();
+// 	// $('#shoppingbag').menu({
+// 	// 	navbar: {
+// 	// 		title: 'General Setting'
+// 	// 	},
+// 	// 	offCanvas: {
+// 	// 		position: 'right'
+// 	// 	}
+// 	// });
 
-	//	fire the plugin
-	$('.mh-head.first').mhead({
-		scroll: {
-			hide: 200
-		}
+// 	//	fire the plugin
+// 	$('.mh-head.first').mhead({
+// 		scroll: {
+// 			hide: 200
+// 		}
 		
-	});
-	$('.mh-head.second').mhead({
-		scroll: false
-	});
+// 	});
+// 	$('.mh-head.second').mhead({
+// 		scroll: false
+// 	});
 
 	
-});		
+// });		
 
 //**** Slide Panel Toggle ***//
 	  $("span.main-menu").on("click", function(){
@@ -319,7 +319,7 @@ jQuery(".post-comt-box textarea").on("keydown", function(event) {
 	if (event.keyCode == 13) {
 		var comment = jQuery(this).val();
 		var parent = jQuery(".showmore").parent("li");
-		var comment_HTML = '	<li><div class="comet-avatar"><img src="~assets/images/resources/comet-1.jpg" alt=""></div><div class="we-comment"><div class="coment-head"><h5><a href="time-line.html" title="">Jason borne</a></h5><span>1 year ago</span><a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a></div><p>'+comment+'</p></div></li>';
+		var comment_HTML = '	<li><div class="comet-avatar"><img src="/images/resources/comet-1.jpg" alt=""></div><div class="we-comment"><div class="coment-head"><h5><a href="time-line.html" title="">Jason borne</a></h5><span>1 year ago</span><a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a></div><p>'+comment+'</p></div></li>';
 		$(comment_HTML).insertBefore(parent);
 		jQuery(this).val('');
 	}
