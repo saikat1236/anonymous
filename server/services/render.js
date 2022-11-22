@@ -5,7 +5,7 @@ const axios=require('axios');
 
 
 exports.homeRoutes = (req,res)=>{
-    axios.get('http://localhost:3000/users')
+    axios.get('https://www.unknowns.onrender.com/users')
     .then(function(res1){
         res.render('index',{users: res1.data});
         // res.redirect('/')
