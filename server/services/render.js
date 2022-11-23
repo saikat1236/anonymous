@@ -2,10 +2,8 @@ const Userdb =require("../models/model");
 
 const axios=require('axios');
 
-
-
 exports.homeRoutes = (req,res)=>{
-    axios.get('https://www.unknowns.onrender.com/users')
+    axios.get('https://unknowns.onrender.com/users')
     .then(function(res1){
         res.render('index',{users: res1.data});
         // res.redirect('/')
