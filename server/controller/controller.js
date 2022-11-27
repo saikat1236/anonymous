@@ -1,4 +1,4 @@
-var Userdb = require('../models/model')
+var {Userdb,Comment} = require('../models/model')
 
 // exports.create= (req,res,next)=>{
 //     // validate request
@@ -31,16 +31,17 @@ var Userdb = require('../models/model')
 
 exports.find = (req, res)=>{
 
-    if(req.query.id){
-        const id = req.query.id;
+    const id = req.params.id;
+    if(id){
 
         Userdb.findById(id)
+            .populate("comments")
             .then(data =>{
                 if(!data){
                     res.status(404).send({ message : "Not found user with id "+ id})
                 }else{
                     res.send(data)
-            res.redirect("index")
+                res.redirect("/")
 
                 }
             })
@@ -50,10 +51,10 @@ exports.find = (req, res)=>{
 
     }else{
         Userdb.find()
+            .populate("comments")
             .then(user => {
                 res.send(user)
-            res.redirect("index")
-
+            // res.redirect("/")
             })
             .catch(err => {
                 res.status(500).send({ message : err.message || "Error Occurred while retriving user information" })

@@ -1,4 +1,4 @@
-<% for(var i = users.length-1; i >= 0 ; i--) { %>
+<% for(var i = post.length-1; i >= 0 ; i--) { %>
     <div class="central-meta item">
         <div class="user-post">
             <div class="friend-info">
@@ -12,7 +12,8 @@
                 <div class="description">
                         
                         <p>
-                           <%=users[i].post%>
+                           <%=post[i].post%>
+                        
                         </p>
                 </div>
                 <!-- <div class="post-meta">	 -->
@@ -35,15 +36,35 @@
             <div class="coment-area">
                 <ul class="we-comet">
                     
-
-                        <!-- <%- include('_posts2')%>                    -->
+                        <% for(var j = 0 ; j < post[i].comments.length ; j++) { %>
+                            <li>
+                                <div class="comet-avatar">
+                                    <img src="/images/log2.jpg" alt="">
+                                </div>
+                                <div class="we-comment">
+                                    <div class="coment-head">
+                                        <h5><a href="time-line.html" title=""></a>Anonymous<%=i%>.comment<%=j%></h5>
+                                        <span>1 week ago</span>
+                                        <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+                                    </div>
+                                    <p><%=post[i].comments[j].comment%>
+                                        <i class="em em-smiley"></i>
+                                    </p>
+                                </div>
+                            </li>
+                            <% } %>
+                          
                     
                     <li class="post-comment">
                         <div class="comet-avatar">
                             <img src="/images/log2.jpg" alt="">
                         </div>
                         <div class="post-comt-box">
-                            <%- include('_form2')%>
+                            <form action='/<%=post[i]._id%>/comment' method="POST" >
+                                <textarea type="text" name="comment" rows="1" placeholder="Post your comment"></textarea>
+                            
+                                           <button type="submit" style="background-color: #336ce6;">Post</button>
+                            </form>
                         </div>
                     </li>
                 </ul>
