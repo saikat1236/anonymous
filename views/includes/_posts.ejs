@@ -21,7 +21,13 @@
                         <ul>
                             <li>
                                 <span class="comment" data-toggle="tooltip" title="Comments">
-                                    <i class="fa fa-comments-o"></i>
+                                    <i class="fa fa-comments-o" style="font-size:16px"></i>
+                                    <ins>0</ins>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="like" data-toggle="tooltip" title="likes">
+                                    <i class="fa fa-thumbs-up" style="font-size:16px"></i>
                                     <ins>0</ins>
                                 </span>
                             </li>
@@ -47,7 +53,7 @@
                                         <span>1 week ago</span>
                                         <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
                                     </div>
-                                    <p><%=post[i].comments[j].comment%>
+                                    <p style="width:100%; word-break:break-all;"><%=post[i].comments[j].comment%>
                                         <i class="em em-smiley"></i>
                                     </p>
                                 </div>
@@ -63,7 +69,7 @@
                             <form action='/<%=post[i]._id%>/comment' method="POST" >
                                 <textarea type="text" name="comment" rows="1" placeholder="Post your comment"></textarea>
                             
-                                           <button type="submit" style="background-color: #336ce6;">Post</button>
+                                           <button type="submit" class="btn btn-outline-dark">Post</button>
                             </form>
                         </div>
                     </li>

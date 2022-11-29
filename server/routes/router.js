@@ -22,7 +22,7 @@ route.get("/", function (req, res, next) {
 
 
 route.post('/',services.create );
-route.post('/:id/comment',services.createcom );
+route.post('/:id/comment',services.createcom )
 
 route.get('/users',controller.find);
 // route.get('/comments',controller.findcom);

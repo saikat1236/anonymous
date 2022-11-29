@@ -77,7 +77,11 @@ body {
 p {
     font-size: 14px;
     line-height: 26px;
-    color: #8c8b8b;
+    color: #fbfbfb;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    word-wrap:break-word;
 }
 
 a,
@@ -102,7 +106,9 @@ button:focus {
 
 img {
     height: auto;
-    max-width: 100%;
+    max-width: 40px;
+    width: 40px;
+    min-width: 40px;
 }
 
 .theme-layout {
@@ -299,7 +305,7 @@ section {
 .gray-bg {
     float: left;
     width: 100%;
-    background: #f4f2f2;
+    background: #121212;
 }
 
 [type="submit"],
@@ -659,11 +665,11 @@ header.sticky {
 /*--- topbar ---*/
 
 .topbar {
-    background: #fff;
+    background: #030303;
     display: block;
     height: 60px;
     padding: 0 20px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 5px rgba(6, 6, 6, 0.8);
     z-index: 999;
     position: relative;
 }
@@ -671,6 +677,7 @@ header.sticky {
 .logo {
     display: block;
     vertical-align: middle;
+    /* height:20%; */
     width: 20%;
     position: relative;
     z-index: 10;
@@ -1311,8 +1318,8 @@ header.sticky {
 }
 
 .central-meta {
-    background: #fdfdfd none repeat scroll 0 0;
-    border: 1px solid #ede9e9;
+    background: #0d0d0d none repeat scroll 0 0;
+    border: 1px solid #333333;
     border-radius: 5px;
     display: inline-block;
     width: 100%;
@@ -1348,12 +1355,12 @@ header.sticky {
     width: 100%;
 }
 .attachments {
-    border: 1px solid #eee;
+    /* border: 1px solid #eee; */
     display: block;
     padding: 10px;
     text-align: right;
     border-top: 0;
-    background: #fff;
+    background: #323232;
 }
 
 .attachments > ul {
@@ -1368,10 +1375,11 @@ header.sticky {
 }
 
 textarea {
-    border: 1px solid #eeeeee;
+    background-color: #323232;
+    border: 1px solid #323030;
     border-radius: 6px 6px 0 0;
     padding: 10px;
-    width: 100%;
+    width: 80%;
     border-bottom: 0;
 }
 
@@ -1419,7 +1427,7 @@ form button {
 }
 
 .friend-name > span {
-    color: #999;
+    color: #bbb8b8;
     float: left;
     font-size: 12px;
     text-transform: capitalize;
@@ -1448,7 +1456,7 @@ form button {
 }
 
 .description > span {
-    color: #424242;
+    color: #ffffff;
     font-size: 18px;
     font-weight: 500;
     line-height: 28px;
@@ -1513,11 +1521,12 @@ form button {
 }
 
 .we-video-info > ul li span ins {
-    font-size: 11px;
+    font-size: 16px;
     left: 20px;
     position: absolute;
     text-decoration: none;
     top: -10px;
+    color: white;
 }
 
 .we-video-info > ul li span.like {
@@ -1818,28 +1827,32 @@ for some reason nth-child(1) is always busy and elements starting from 2 */
     margin-bottom: 0;
 }
 
+
 .comet-avatar {
     display: table-cell;
     max-width: 7.6%;
     vertical-align: top;
     width: 7.6%;
+    /* margin-right: 10px; */
+    /* padding: 5px; */
 }
 .comet-avatar > img{
-	max-width: 35px;
-	width: 35px;
-	min-width: 35px;
+	max-width: 30px;
+	width: 30px;
+    margin-top: 7px;
+	min-width: 30px;
 }
 .we-comment {
-    border: 1px solid #ede9e9;
+    /* border: 1px solid #ede9e9; */
     display: table-cell;
     margin-left: 20px;
-    padding: 10px;
+    padding: 3px;
     vertical-align: top;
     position: relative;
-    width: 65%;
+    width: 60%;
 }
 
-.we-comment::before,
+/* .we-comment::before,
 .peoples-mesg-box > ul > li p:before {
     border-bottom: 10px solid transparent;
     border-right: 11px solid #ede9e9;
@@ -1848,9 +1861,9 @@ for some reason nth-child(1) is always busy and elements starting from 2 */
     top: 10px;
     position: absolute;
     content: '';
-}
+} */
 
-.we-comment::after,
+/* .we-comment::after,
 .peoples-mesg-box > ul > li p:after {
     border-bottom: 8px solid transparent;
     border-right: 9px solid #fff;
@@ -1859,7 +1872,7 @@ for some reason nth-child(1) is always busy and elements starting from 2 */
     top: 12px;
     position: absolute;
     content: '';
-}
+} */
 
 .we-comet > li ul {
     margin-left: 55px;
@@ -1896,7 +1909,7 @@ for some reason nth-child(1) is always busy and elements starting from 2 */
     text-transform: capitalize;
     display: inline-block;
     margin-bottom: 0;
-    color: #2a2a2a;
+    color: #156ECD;
 }
 
 .we-comment > p {
@@ -1905,6 +1918,8 @@ for some reason nth-child(1) is always busy and elements starting from 2 */
     margin-bottom: 0;
     max-width: 100%;
     margin-top: 5px;
+    width: 100%;
+    word-wrap:break-word;
 }
 
 .we-reply {
@@ -1936,7 +1951,7 @@ li.post-comment .comet-avatar {
 }
 
 .post-comt-box form textarea {
-    background: #f3f3f3 none repeat scroll 0 0;
+    background: #242424 none repeat scroll 0 0;
     border-color: transparent;
     border-radius: 3px;
     color: #696969;
@@ -1999,10 +2014,11 @@ li.post-comment .comet-avatar {
 }
 
 .post-comt-box form button {
-    bottom: 2px;
-    position: absolute;
+    /* bottom: 2px; */
+    position:absolute;
     right: 0;
-    background: none;
+    /* height: 100%; */
+    /* background: none; */
 }
 
 
@@ -4622,7 +4638,7 @@ canvas {
 }
 
 .mh-head {
-    background: #4bb5ef;
+    background: #121212;
     color: #fff;
     height: auto;
 }
@@ -8941,7 +8957,7 @@ a.btn2:hover {
 .comment-form-author input,
 .comment-form-email input,
 .comment-notes textarea {
-    border: 2px solid #eaeaeb;
+    /* border: 2px solid #eaeaeb; */
     color: #7b7d7f;
     font-size: 13px;
     padding: 15px 20px;
