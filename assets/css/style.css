@@ -1954,7 +1954,7 @@ li.post-comment .comet-avatar {
     background: #242424 none repeat scroll 0 0;
     border-color: transparent;
     border-radius: 3px;
-    color: #696969;
+    color: whitesmoke;
     font-size: 13px;
     font-weight: 400;
     height: 40px;
@@ -4638,7 +4638,7 @@ canvas {
 }
 
 .mh-head {
-    background: #121212;
+    background: #030303;
     color: #fff;
     height: auto;
 }

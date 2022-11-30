@@ -5223,6 +5223,7 @@ textarea {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
+  color: whitesmoke;
 }
 button,
 input {
@@ -7867,7 +7868,7 @@ fieldset:disabled a.btn {
   /* color: #343a40; */
   /* background-color: transparent; */
   background-image: none;
-  border-color: #343a40;
+  /* border-color: #343a40; */
 }
 .btn-outline-dark:hover {
   color: #fff;

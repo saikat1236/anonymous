@@ -65,7 +65,7 @@ console.log(req.params.id)
             else {
                 data.comments.unshift(result)
                 data.save()
-                console.log(data.comments)
+                // console.log(data.comments)
                 res.redirect("/")
             }
         })

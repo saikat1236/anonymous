@@ -7,7 +7,7 @@
                 </figure>
                 <div class="friend-name">
                     <ins><a href="time-line.html" title="">Anonymous<%=i%></a></ins>
-                    <span>published: june,2 2018 19:PM</span>
+                    <span>published: <%=post[i].createdAt.toUTCString()%></span>
                 </div>
                 <div class="description">
                         
@@ -22,7 +22,7 @@
                             <li>
                                 <span class="comment" data-toggle="tooltip" title="Comments">
                                     <i class="fa fa-comments-o" style="font-size:16px"></i>
-                                    <ins>0</ins>
+                                    <ins><%=post[i].comments.length%></ins>
                                 </span>
                             </li>
                             <li>
@@ -50,7 +50,7 @@
                                 <div class="we-comment">
                                     <div class="coment-head">
                                         <h5><a href="time-line.html" title=""></a>Anonymous<%=i%>.comment<%=j%></h5>
-                                        <span>1 week ago</span>
+                                        <span><%=Math.floor((new Date().getTime()- post[i].comments[j].createdAt.getTime())/(1000*3600*24))%> days ago</span>
                                         <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
                                     </div>
                                     <p style="width:100%; word-break:break-all;"><%=post[i].comments[j].comment%>
