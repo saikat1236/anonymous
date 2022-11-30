@@ -1,4 +1,4 @@
-<% for(var i = users.length-1; i >= 0 ; i--) { %>
+<% for(var i = post.length-1; i >= 0 ; i--) { %>
     <div class="central-meta item">
         <div class="user-post">
             <div class="friend-info">
@@ -7,12 +7,15 @@
                 </figure>
                 <div class="friend-name">
                     <ins><a href="time-line.html" title="">Anonymous<%=i%></a></ins>
-                    <span>published: june,2 2018 19:PM</span>
+                    <span>published: <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata",hour: '2-digit', minute:'2-digit' })%></span>
+                    <!-- <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
+                    <!-- <%= post[i].createdAt.toUTCString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
                 </div>
                 <div class="description">
                         
                         <p>
-                           <%=users[i].post%>
+                           <%=post[i].post%>
+                        
                         </p>
                 </div>
                 <!-- <div class="post-meta">	 -->
@@ -20,7 +23,13 @@
                         <ul>
                             <li>
                                 <span class="comment" data-toggle="tooltip" title="Comments">
-                                    <i class="fa fa-comments-o"></i>
+                                    <i class="fa fa-comments-o" style="font-size:16px"></i>
+                                    <ins><%=post[i].comments.length%></ins>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="like" data-toggle="tooltip" title="likes">
+                                    <i class="fa fa-thumbs-up" style="font-size:16px"></i>
                                     <ins>0</ins>
                                 </span>
                             </li>
@@ -35,15 +44,35 @@
             <div class="coment-area">
                 <ul class="we-comet">
                     
-
-                        <!-- <%- include('_posts2')%>                    -->
+                        <% for(var j = 0 ; j < post[i].comments.length ; j++) { %>
+                            <li>
+                                <div class="comet-avatar">
+                                    <img src="/images/log2.jpg" alt="">
+                                </div>
+                                <div class="we-comment">
+                                    <div class="coment-head">
+                                        <h5><a href="time-line.html" title=""></a>Anonymous<%=i%>.comment<%=j%></h5>
+                                        <span><%=Math.floor((new Date().getTime()- post[i].comments[j].createdAt.getTime())/(1000*3600*24))%> days ago</span>
+                                        <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+                                    </div>
+                                    <p style="width:100%; word-break:break-all;"><%=post[i].comments[j].comment%>
+                                        <!-- <i class="em em-smiley"></i> -->
+                                    </p>
+                                </div>
+                            </li>
+                            <% } %>
+                          
                     
                     <li class="post-comment">
                         <div class="comet-avatar">
                             <img src="/images/log2.jpg" alt="">
                         </div>
                         <div class="post-comt-box">
-                            <%- include('_form2')%>
+                            <form action='/<%=post[i]._id%>/comment' method="POST" >
+                                <textarea type="text" name="comment" rows="1" placeholder="Post your comment"></textarea>
+                            
+                                           <button type="submit" class="btn btn-outline-dark">Post</button>
+                            </form>
                         </div>
                     </li>
                 </ul>

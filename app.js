@@ -30,6 +30,7 @@ app.use('/js',express.static(path.resolve(__dirname,"assets/js")))
 // app.use('/output',express.static(path.resolve(__dirname,"views/output")))
 app.use('/images',express.static(path.resolve(__dirname,"assets/images")))
 app.use('/fonts',express.static(path.resolve(__dirname,"assets/fonts")))
+app.use('/includes',express.static(path.resolve(__dirname,"views/includes")))
 
 //routes
 app.use('/',require('./server/routes/router'))
