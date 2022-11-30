@@ -14,7 +14,7 @@ route.get("/", function (req, res, next) {
         if(err){
            console.log(err);
         } else {
-           console.log(post);
+        //    console.log(post);
            res.render("index", {post: post });
         }
     });
