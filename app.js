@@ -9,11 +9,18 @@ const app = express();
 dotenv.config({path: "config.env"})
 const port = process.env.PORT || 3000
 
+// server
+app.listen(port, () => {
+    console.log("Server is running on http://localhost:" + port);
+});
+
 //log req
 app.use(morgan("tiny"));
 
 //moongodb
 connectDB();
+
+
 
 //parse req
 app.use(bodyparser.urlencoded({extended: true}))

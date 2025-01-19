@@ -16,7 +16,56 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/color.css">
     <link rel="stylesheet" href="/css/responsive.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <!-- <link rel="stylesheet" href="/css/strip.css"> -->
+
+	<style>
+		/* Floating Button Container */
+		.floating-button {
+		  position: fixed;
+		  top: 20px;
+		  right: 60px;
+		  background-color: #2196F3; /* Blue background */
+		  color: white;
+		  border-radius: 50%;
+		  width: 60px;
+		  height: 60px;
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+		  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+		  transition: transform 0.3s ease, box-shadow 0.3s ease;
+		  cursor: pointer;
+		}
+	
+		.floating-button:hover {
+		  transform: scale(1.1);
+		  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+		}
+	
+		/* Tooltip for Floating Button */
+		.floating-button-tooltip {
+		  position: absolute;
+		  top: 75px;
+		  right: 5px;
+		  background-color: #333;
+		  color: white;
+		  padding: 5px 10px;
+		  border-radius: 5px;
+		  font-size: 12px;
+		  opacity: 0;
+		  transform: translateY(10px);
+		  transition: opacity 0.3s ease, transform 0.3s ease;
+		  pointer-events: none;
+		}
+	
+		.floating-button:hover .floating-button-tooltip {
+		  opacity: 1;
+		  transform: translateY(0);
+		}
+	  </style>
 
 </head>
 <body>
@@ -47,11 +96,13 @@
 				<a title="" href="/"><img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;" class="center"></a>
 				<p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/" style="color: aqua;"> Saikat</a></p>
 			</div>
-			<!-- <div class="logo2 ">
-				<a title="" href="/"><img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;" class="center"></a>
-			</div> -->
-			<!-- <h6 style="color:rgb(228, 219, 219)">unknowns</h6> -->
-			
-		<!-- </div> -->
+			<!-- <span style="color: aliceblue;">Video Chat</span> -->
+			<div class="floating-button">
+				<a href="/" style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+				  <i class="material-icons">video_call</i>
+				</a>
+			</div>
+			  
+
 		
 	</div><!-- topbar -->	
