@@ -2,56 +2,56 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
-const path = require("path")
+const path = require("path");
 const connectDB = require('./server/database/connection');
+const http = require("http");
+const { Server } = require("socket.io");
+
+dotenv.config({ path: "config.env" });
+
 const app = express();
+const port = process.env.PORT || 3000;
 
-dotenv.config({path: "config.env"})
-const port = process.env.PORT || 3000
+// Create an HTTP server
+const server = http.createServer(app);
 
-// server
-app.listen(port, () => {
+// Initialize Socket.IO with the HTTP server
+const io = new Server(server);
+
+// Log when a client connects or disconnects
+io.on("connection", (socket) => {
+    console.log("A user connected");
+
+    socket.on("disconnect", () => {
+        console.log("A user disconnected");
+    });
+});
+
+// Start the server
+server.listen(port, () => {
     console.log("Server is running on http://localhost:" + port);
 });
 
-//log req
+// Log requests
 app.use(morgan("tiny"));
 
-//moongodb
+// MongoDB connection
 connectDB();
 
+// Parse requests
+app.use(bodyparser.urlencoded({ extended: true }));
 
+// View engine setup
+app.set("view engine", "ejs");
 
-//parse req
-app.use(bodyparser.urlencoded({extended: true}))
+// Load assets
+app.use('/css', express.static(path.resolve(__dirname, "assets/css")));
+app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
+app.use('/images', express.static(path.resolve(__dirname, "assets/images")));
+app.use('/fonts', express.static(path.resolve(__dirname, "assets/fonts")));
+app.use('/includes', express.static(path.resolve(__dirname, "views/includes")));
 
-// view engine setup
-// app.engine('html', cons.swig)
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'html');
-app.set('view engine', 'ejs');
-
-//load assets
-app.use('/css',express.static(path.resolve(__dirname,"assets/css")));
-app.use('/js',express.static(path.resolve(__dirname,"assets/js")));
-// app.use('/output',express.static(path.resolve(__dirname,"views/output")));
-app.use('/images',express.static(path.resolve(__dirname,"assets/images")));
-app.use('/fonts',express.static(path.resolve(__dirname,"assets/fonts")));
-app.use('/includes',express.static(path.resolve(__dirname,"views/includes")));
-
-//routes
-app.use('/',require('./server/routes/router'));
-
-
-// app.listen(port,()=>{  // do not add localhost here if you are deploying it
-//     console.log("server listening to port "+port);
-// });
+// Routes
+app.use('/', require('./server/routes/router'));
 
 module.exports = app;
-
-
-
-
-
-
-
