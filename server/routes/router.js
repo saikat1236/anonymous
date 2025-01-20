@@ -5,6 +5,9 @@ const controller = require('../controller/controller')
 const {Userdb} = require("../models/model");
 
 // route.get('/',services.homeRoutes);
+route.get('/video-chat', (req, res) => {
+    res.render('video-chat');
+});
 
 route.get("/", function (req, res, next) {
 

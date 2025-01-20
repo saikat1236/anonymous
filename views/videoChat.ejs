@@ -1,0 +1,331 @@
+<!-- views/videoChat.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .waiting-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(88, 28, 135, 0.4);
+        }
+
+        .waiting-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 12rem;
+            height: 12rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: white;
+            border-radius: 9999px;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            .chat-container {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .video-section {
+            position: relative;
+            padding: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .video-section {
+                padding: 4rem;
+            }
+        }
+
+        #strangerVideo {
+            width: 100%;
+            height: calc(100vh - 120px);
+            background-color: black;
+            border-radius: 1.5rem;
+            object-fit: cover;
+        }
+
+        #myVideo {
+            position: absolute;
+            bottom: 3rem;
+            right: 3rem;
+            width: 8rem;
+            height: 8rem;
+            background-color: rgb(243, 232, 255);
+            border-radius: 9999px;
+            object-fit: cover;
+            outline: 2px solid rgb(167, 139, 250);
+        }
+
+        @media (min-width: 1024px) {
+            #myVideo {
+                width: 18rem;
+                height: 18rem;
+            }
+        }
+
+        .chat-section {
+            position: relative;
+            padding: 2rem;
+            border-left: 2px solid rgb(191, 219, 254);
+            height: 40vh;
+            overflow: auto;
+        }
+
+        @media (min-width: 1024px) {
+            .chat-section {
+                height: 100vh;
+            }
+        }
+
+        .messages-container {
+            margin-bottom: 6rem;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            color: rgb(75, 85, 99);
+        }
+
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            display: flex;
+            gap: 1rem;
+            padding: 2rem;
+            background-color: white;
+            width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+            .input-container {
+                width: 25%;
+            }
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border: 2px solid rgb(167, 139, 250);
+            border-radius: 1rem;
+        }
+
+        .message-input:focus {
+            outline: none;
+        }
+
+        .send-button {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: white;
+            background-color: rgb(124, 58, 237);
+            border: 2px solid rgb(167, 139, 250);
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="waitingScreen" class="waiting-screen">
+        <span class="waiting-text">Waiting For Someone...</span>
+    </div>
+
+    <div class="chat-container">
+        <div class="video-section">
+            <video id="strangerVideo" autoplay playsinline></video>
+            <video id="myVideo" autoplay playsinline muted></video>
+        </div>
+
+        <div class="chat-section">
+            <div id="messagesContainer" class="messages-container"></div>
+            
+            <div class="input-container">
+                <input type="text" id="messageInput" class="message-input" placeholder="Type your message here...">
+                <button id="sendButton" class="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('https://omegle-clone-isz1.onrender.com');
+        let peer = null;
+        let type = null;
+        let roomId = null;
+        let localStream = null;
+
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+            ],
+        };
+
+        // DOM elements
+        const myVideo = document.getElementById('myVideo');
+        const strangerVideo = document.getElementById('strangerVideo');
+        const waitingScreen = document.getElementById('waitingScreen');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Initialize local stream
+        async function initLocalStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: true
+                });
+                localStream = stream;
+                myVideo.srcObject = stream;
+            } catch (err) {
+                console.error('Error accessing media devices:', err);
+            }
+        }
+
+        // Initialize socket connection
+        socket.emit('start', (person) => {
+            console.log('Started as:', person);
+            type = person;
+        });
+
+        // Handle remote connection
+        socket.on('remote-socket', async (id) => {
+            console.log('Connected to remote socket:', id);
+            waitingScreen.style.display = 'none';
+
+            peer = new RTCPeerConnection(configuration);
+
+            // Add local stream tracks to peer connection
+            localStream.getTracks().forEach(track => {
+                peer.addTrack(track, localStream);
+            });
+
+            // Handle incoming tracks
+            peer.ontrack = (e) => {
+                console.log('Received remote track:', e.streams[0]);
+                if (strangerVideo && e.streams[0]) {
+                    strangerVideo.srcObject = e.streams[0];
+                }
+            };
+
+            // Handle ICE candidates
+            peer.onicecandidate = (e) => {
+                if (e.candidate) {
+                    console.log('Generated ICE candidate:', e.candidate);
+                    socket.emit('ice:send', { candidate: e.candidate });
+                }
+            };
+
+            // If we're p1, create and send the offer
+            if (type === 'p1') {
+                try {
+                    const offer = await peer.createOffer();
+                    await peer.setLocalDescription(offer);
+                    socket.emit('sdp:send', { sdp: offer });
+                } catch (err) {
+                    console.error('Error creating offer:', err);
+                }
+            }
+        });
+
+        // Handle room ID
+        socket.on('roomid', (id) => {
+            console.log('Joined room:', id);
+            roomId = id;
+        });
+
+        // Handle SDP exchange
+        socket.on('sdp:reply', async ({ sdp }) => {
+            if (!peer) return;
+            
+            try {
+                console.log('Received SDP:', sdp.type);
+                await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+
+                if (sdp.type === 'offer') {
+                    console.log('Creating answer as p2');
+                    const answer = await peer.createAnswer();
+                    await peer.setLocalDescription(answer);
+                    socket.emit('sdp:send', { sdp: answer });
+                }
+            } catch (error) {
+                console.error('Error handling SDP:', error);
+            }
+        });
+
+        // Handle ICE candidates
+        socket.on('ice:reply', async ({ candidate }) => {
+            if (!peer || !candidate) return;
+            
+            try {
+                console.log('Received ICE candidate');
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (error) {
+                console.error('Error adding ICE candidate:', error);
+            }
+        });
+
+        // Handle incoming messages
+        socket.on('get-message', (input) => {
+            addMessage(input, 'Stranger');
+        });
+
+        // Handle disconnection
+        socket.on('disconnected', () => {
+            console.log('Disconnected from server');
+            window.location.href = '/?disconnect';
+        });
+
+        // Send message function
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            socket.emit('send-message', message, type, roomId);
+            addMessage(message, 'You');
+            messageInput.value = '';
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Initialize
+        initLocalStream();
+    </script>
+</body>
+</html>
