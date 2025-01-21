@@ -339,6 +339,32 @@
             ],
         };
 
+        const peerConnection = new RTCPeerConnection(configuration);
+       // Monitor ICE connection state changes
+peerConnection.oniceconnectionstatechange = () => {
+  console.log('ICE Connection State:', peerConnection.iceConnectionState);
+};
+
+// Monitor overall connection state changes
+peerConnection.onconnectionstatechange = () => {
+  console.log('Connection State:', peerConnection.connectionState);
+
+  switch (peerConnection.connectionState) {
+    case 'connected':
+      console.log('Peers are connected!');
+      break;
+    case 'disconnected':
+      console.log('Peer disconnected.');
+      break;
+    case 'failed':
+      console.error('Connection failed.');
+      break;
+    case 'closed':
+      console.log('Connection closed.');
+      break;
+  }
+};
+
         // DOM elements
         const myVideo = document.getElementById('myVideo');
         const strangerVideo = document.getElementById('strangerVideo');
@@ -369,6 +395,7 @@
 
         // Handle remote connection
         socket.on('remote-socket', async (id) => {
+            remoteSocket = id;
             console.log('Connected to remote socket:', id);
             waitingScreen.style.display = 'none';
 
@@ -383,6 +410,7 @@
             peer.ontrack = (e) => {
                 console.log('Received remote track:', e.streams[0]);
                 if (strangerVideo && e.streams[0]) {
+                    console.log('strangerVideo is here');
                     strangerVideo.srcObject = e.streams[0];
                 }
             };
@@ -391,7 +419,7 @@
             peer.onicecandidate = (e) => {
                 if (e.candidate) {
                     console.log('Generated ICE candidate:', e.candidate);
-                    socket.emit('ice:send', { candidate: e.candidate });
+                    socket.emit('ice:send', { candidate: e.candidate ,to: remoteSocket });
                 }
             };
 
