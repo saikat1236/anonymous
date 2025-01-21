@@ -1,158 +1,305 @@
-<!-- views/videoChat.ejs -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
     <title>unknowns</title>
     <link rel="icon" href="/images/loogo.png" type="/images/jpg" sizes="16x16">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/main.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/color.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        .waiting-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
+<style>
+    .waiting-screen {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0,0.01);
+    }
+
+    .waiting-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 12rem;
+        height: 12rem;
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: white;
+        border-radius: 9999px;
+        animation: pulse 2s infinite;
+    }
+    .chat-container {
+
+    display: grid;
+    grid-template-rows: 3fr 1fr; /* Video section takes 3 parts; chat takes 1 part */
+    height: 100vh;
+    overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+    .chat-container {
+        grid-template-columns: 3fr 1fr; /* Video section takes 3 parts; chat takes 1 part */
+    }
+}
+
+.video-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: black;
+    height: 100%;
+    margin: 1rem;
+    border-radius: 2rem;
+}
+
+
+#strangerVideo {
+    width: 100%;
+    height: 100%;
+    border-radius: 10rem;
+    object-fit: cover;
+}
+
+#myVideo {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    width: 5rem;
+    height: 5rem;
+    background-color: rgb(243, 232, 255);
+    border-radius: 9999px;
+    object-fit: cover;
+    outline: 2px solid rgb(167, 139, 250);
+}
+
+@media (min-width: 1024px) {
+    #myVideo {
+        width: 8rem;
+        height: 8rem;
+    }
+}
+
+.chat-section {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: visible;
+    padding: 1rem;
+    background-color: white;
+    border-top: 2px solid rgb(191, 219, 254);
+}
+
+
+@media (min-width: 1024px) {
+    .chat-section {
+        border-top: none;
+        border-left: 2px solid rgb(191, 219, 254);
+        height: 45rem;
+    }
+}
+
+.messages-container {
+    margin-bottom: 5rem;
+    max-height: calc(100% - 6rem);
+    overflow-y: auto;
+}
+
+.input-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    /* background-color: white; */
+    width: 100%;
+    /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
+}
+
+@media (min-width: 1024px) {
+    .input-container {
+        width: 25%;
+        left: auto;
+        right: 0;
+    }
+}
+
+.message-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border: 2px solid rgb(167, 139, 250);
+    border-radius: 1rem;
+}
+
+.message-input:focus {
+    outline: none;
+}
+
+.send-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+    color: white;
+    background-color: rgb(124, 58, 237);
+    border: 2px solid rgb(167, 139, 250);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+
+        /* Floating Button Container */
+
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%; /* Ensure it spans the full width */
+            padding: 0 20px;
+            height: 100px; /* Set a consistent height for the header */
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+		.logo-container2 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            background-color: #2196F3;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(88, 28, 135, 0.4);
-        }
-
-        .waiting-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 12rem;
-            height: 12rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            color: white;
-            border-radius: 9999px;
-            animation: pulse 2s infinite;
-        }
-
-        .chat-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        @media (min-width: 1024px) {
-            .chat-container {
-                grid-template-columns: 3fr 1fr;
-            }
-        }
-
-        .video-section {
-            position: relative;
-            padding: 2rem;
-        }
-
-        @media (min-width: 1024px) {
-            .video-section {
-                padding: 4rem;
-            }
-        }
-
-        #strangerVideo {
-            width: 100%;
-            height: calc(100vh - 120px);
-            background-color: black;
-            border-radius: 1.5rem;
-            object-fit: cover;
-        }
-
-        #myVideo {
-            position: absolute;
-            bottom: 3rem;
-            right: 3rem;
-            width: 8rem;
-            height: 8rem;
-            background-color: rgb(243, 232, 255);
-            border-radius: 9999px;
-            object-fit: cover;
-            outline: 2px solid rgb(167, 139, 250);
-        }
-
-        @media (min-width: 1024px) {
-            #myVideo {
-                width: 18rem;
-                height: 18rem;
-            }
-        }
-
-        .chat-section {
-            position: relative;
-            padding: 2rem;
-            border-left: 2px solid rgb(191, 219, 254);
-            height: 40vh;
-            overflow: auto;
-        }
-
-        @media (min-width: 1024px) {
-            .chat-section {
-                height: 100vh;
-            }
-        }
-
-        .messages-container {
-            margin-bottom: 6rem;
-        }
-
-        .message {
-            margin-bottom: 1rem;
-            color: rgb(75, 85, 99);
-        }
-
-        .input-container {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            display: flex;
-            gap: 1rem;
-            padding: 2rem;
-            background-color: white;
-            width: 100%;
-        }
-
-        @media (min-width: 1024px) {
-            .input-container {
-                width: 25%;
-            }
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            border: 2px solid rgb(167, 139, 250);
-            border-radius: 1rem;
-        }
-
-        .message-input:focus {
-            outline: none;
-        }
-
-        .send-button {
-            padding: 0.5rem 1.25rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            color: white;
-            background-color: rgb(124, 58, 237);
-            border: 2px solid rgb(167, 139, 250);
-            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
         }
+
+
+
+		.center-text {
+    flex: 1;
+    text-align: center;
+    font-size: 6vw; /* Larger text for header */
+    font-weight: semi-bold; /* Make the text bold */
+    /* text-transform: uppercase; Make the text uppercase */
+	font-family: 'Courier New', monospace;
+    color: transparent; /* Make the text color transparent for the effect */
+    position: relative; /* For positioning the light effect */
+    /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0) 50%, #fff 50%);
+    background-size: 200% 100%; /* Make the gradient double the text size */
+    background-position: -100% 0; /* Start the gradient from the left */
+
+    -webkit-background-clip: text; /* Webkit for compatibility */
+    background-clip: text; /* Clip the background to the text */
+    animation: lightEffect 7s ease-in-out infinite; /* Animation for the light effect */
+}
+
+/* Keyframe animation for the light effect */
+@keyframes lightEffect {
+    0% {
+        background-position: -100% 0; /* Light starts from the left */
+    }
+    50% {
+        background-position: 100% 0; /* Light moves to the right */
+    }
+    100% {
+        background-position: -100% 0; /* Light returns to the left */
+    }
+}
+
+
+
+
     </style>
+
 </head>
+
 <body>
-    <div id="waitingScreen" class="waiting-screen">
+    <div class="theme-layout">
+        <div class="postoverlay"></div>
+        <!-- <div class="responsive-header">
+            <div class="mh-head first Sticky">
+                <div class="header-container">
+                    <span class="logo-container">
+                        <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
+                        <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
+                                style="color: aqua;"> Saikat</a></p>
+                    </span>
+                    <span class="center-text">unknowns</span>
+                    <span class="logo-container2">
+                        <a href="/video-chat"
+                            style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                            <i class="material-icons">video_call</i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="topbar stick">
+            <div class="logo">
+                <a title="" href="/"><img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;"
+                        class="center"></a>
+                <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/" style="color: aqua;"> Saikat</a>
+                </p>
+            </div>
+			<span class="center-text">unknowns</span>
+            <div class="logo-container2">
+                <a href="/video-chat"
+                    style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                    <i class="material-icons">video_call</i>
+                </a>
+            </div>
+        </div> -->
+        <div class="first Sticky" style="background-color: black;">
+            <div class="header-container">
+                <span class="logo-container">
+                    <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
+                    <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
+                            style="color: aqua;"> Saikat</a></p>
+                </span>
+                <span class="center-text">unknowns</span>
+                <span class="logo-container2">
+                    <a href="/video-chat"
+                        style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                        <i class="material-icons">video_call</i>
+                    </a>
+                </span>
+            </div>
+        </div>
+  
+    <!-- <div id="waitingScreen" class="waiting-screen">
         <span class="waiting-text">Waiting For Someone...</span>
-    </div>
+    </div> -->
 
     <div class="chat-container">
         <div class="video-section">
+                <div id="waitingScreen" class="waiting-screen">
+        <span class="waiting-text">Waiting For Someone...</span>
+    </div>
             <video id="strangerVideo" autoplay playsinline></video>
             <video id="myVideo" autoplay playsinline muted></video>
         </div>
@@ -165,6 +312,7 @@
                 <button id="sendButton" class="send-button">Send</button>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -330,3 +478,5 @@
     </script>
 </body>
 </html>
+
+
