@@ -61,6 +61,7 @@
     height: 100%;
     margin: 1rem;
     border-radius: 2rem;
+    outline: 2px solid rgb(167, 139, 250);
 }
 
 
@@ -69,6 +70,7 @@
     height: 100%;
     border-radius: 10rem;
     object-fit: cover;
+
 }
 
 #myVideo {
@@ -96,7 +98,7 @@
     flex-grow: 1;
     overflow-y: visible;
     padding: 1rem;
-    background-color: white;
+    /* background-color: white; */
     border-top: 2px solid rgb(191, 219, 254);
 }
 
@@ -295,7 +297,11 @@
         <span class="waiting-text">Waiting For Someone...</span>
     </div> -->
 
-    <div class="chat-container">
+    <div class="chat-container" style="background-color: #111111;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;">
         <div class="video-section">
                 <div id="waitingScreen" class="waiting-screen">
         <span class="waiting-text">Waiting For Someone...</span>
