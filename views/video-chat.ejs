@@ -58,7 +58,7 @@
     justify-content: center;
     position: relative;
     background-color: black;
-    height: 80%;
+    height: 50%;
     margin: 1rem;
     border-radius: 2rem;
     outline: 2px solid rgb(167, 139, 250);
@@ -339,31 +339,31 @@
             ],
         };
 
-        const peerConnection = new RTCPeerConnection(configuration);
+        // const peerConnection = new RTCPeerConnection(configuration);
        // Monitor ICE connection state changes
-peerConnection.oniceconnectionstatechange = () => {
-  console.log('ICE Connection State:', peerConnection.iceConnectionState);
-};
+// peerConnection.oniceconnectionstatechange = () => {
+//   console.log('ICE Connection State:', peerConnection.iceConnectionState);
+// };
 
-// Monitor overall connection state changes
-peerConnection.onconnectionstatechange = () => {
-  console.log('Connection State:', peerConnection.connectionState);
+// // Monitor overall connection state changes
+// peerConnection.onconnectionstatechange = () => {
+//   console.log('Connection State:', peerConnection.connectionState);
 
-  switch (peerConnection.connectionState) {
-    case 'connected':
-      console.log('Peers are connected!');
-      break;
-    case 'disconnected':
-      console.log('Peer disconnected.');
-      break;
-    case 'failed':
-      console.error('Connection failed.');
-      break;
-    case 'closed':
-      console.log('Connection closed.');
-      break;
-  }
-};
+//   switch (peerConnection.connectionState) {
+//     case 'connected':
+//       console.log('Peers are connected!');
+//       break;
+//     case 'disconnected':
+//       console.log('Peer disconnected.');
+//       break;
+//     case 'failed':
+//       console.error('Connection failed.');
+//       break;
+//     case 'closed':
+//       console.log('Connection closed.');
+//       break;
+//   }
+// };
 
         // DOM elements
         const myVideo = document.getElementById('myVideo');
