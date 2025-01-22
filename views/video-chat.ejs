@@ -378,7 +378,11 @@
                             style="color: aqua;"> Saikat</a></p>
                 </span>
                 <span class="center-text">unknowns</span>
+
+
+                <button id="disconnectButton" class="logo-container2" style="background-color: red;">Disconnect</button>
                 <span class="logo-container2">
+
   
                     <a href="/video-chat"
                         style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
@@ -429,7 +433,11 @@
   // Update UI with the roomArr size
   document.getElementById('room-size').textContent = `${size} online`;
 });
-
+    // Handle the disconnect button click
+    document.getElementById('disconnectButton').addEventListener('click', () => {
+  // Emit the custom manual disconnect event
+  socket.emit('disconnect:manual');
+});
         let peer = null;
         let type = null;
         let roomId = null;
