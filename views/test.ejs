@@ -1,31 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Call</title>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <title>unknowns</title>
+    <link
+      rel="icon"
+      href="/images/loogo.png"
+      type="/images/jpg"
+      sizes="16x16"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/main.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/color.css" />
+    <link rel="stylesheet" href="/css/responsive.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <script src="/socket.io/socket.io.js"></script>
     <style>
-        video {
-            width: 400px;
-            height: 300px;
+      /* Add this to your existing <style> section in video-chat.ejs */
+      .online-users-counter {
+        position: fixed;
+        top: 5rem;
+        right: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        border: 2px solid rgb(139, 92, 246);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      .online-indicator {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 9999px;
+        background-color: rgb(34, 197, 94);
+        animation: pulse 2s infinite;
+      }
+
+      .online-count {
+        color: white;
+        font-weight: 600;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
         }
-        #remoteVideo {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+
+        50% {
+          opacity: 0.5;
         }
+      }
+
+      @keyframes countChange {
+        0% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.1);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .count-animate {
+        animation: countChange 0.5s ease-out;
+      }
+
+      .waiting-screen {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.01);
+      }
+
+      .waiting-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 15rem;
+        height: 3rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: white;
+        border-radius: 8rem;
+        animation: pulse 2s infinite;
+        background-color: #2196f3;
+      }
+
+      .chat-container {
+        display: grid;
+        grid-template-rows: 3fr 1fr;
+        /* Video section takes 3 parts; chat takes 1 part */
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      @media (min-width: 1024px) {
+        .chat-container {
+          grid-template-columns: 3fr 1fr;
+          /* Video section takes 3 parts; chat takes 1 part */
+        }
+      }
+
+      .video-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background-color: black;
+        height: 85%;
+        margin: 1rem;
+        border-radius: 2rem;
+        outline: 2px solid rgb(167, 139, 250);
+      }
+
+      #strangerVideo {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        /* Prevent video from exceeding the container height */
+        max-width: 100%;
+        /* Prevent video from exceeding the container width */
+        border-radius: 2rem;
+        object-fit: cover;
+        outline: 2px solid rgb(167, 139, 250);
+      }
+
+      #myVideo {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        width: 8rem;
+        height: 8rem;
+        background-color: rgb(243, 232, 255);
+        border-radius: 9999px;
+        object-fit: cover;
+        outline: 2px solid rgb(167, 139, 250);
+        transform: scaleX(-1);
+        /* Mirrors the video horizontally */
+      }
+
+      @media (min-width: 1024px) {
+        #myVideo {
+          top: 2rem;
+          width: 10rem;
+          height: 10rem;
+          transform: scaleX(-1);
+          /* Mirrors the video horizontally */
+        }
+      }
+
+      .chat-section {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow-y: visible;
+        padding: 1rem;
+        /* background-color: white; */
+        /* border-top: 2px solid rgb(191, 219, 254); */
+      }
+
+      @media (min-width: 1024px) {
+        .chat-section {
+          border-top: none;
+          /* border-left: 2px solid rgb(191, 219, 254); */
+          height: 45rem;
+        }
+      }
+
+      .messages-container {
+        margin-bottom: 5rem;
+        max-height: calc(100% - 6rem);
+        overflow-y: auto;
+      }
+
+      .input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        /* background-color: white; */
+        width: 100%;
+        /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
+      }
+
+      @media (min-width: 1024px) {
+        .input-container {
+          width: 25%;
+          left: auto;
+          right: 0;
+        }
+      }
+
+      .message-input {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border: 2px solid rgb(167, 139, 250);
+        border-radius: 1rem;
+      }
+
+      .message-input:focus {
+        outline: none;
+      }
+
+      .send-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: white;
+        background-color: rgb(124, 58, 237);
+        border: 2px solid rgb(167, 139, 250);
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+
+      /* Floating Button Container */
+
+      .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        /* Ensure it spans the full width */
+        padding: 0 20px;
+        height: 100px;
+        /* Set a consistent height for the header */
+      }
+
+      .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-container2 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #2196f3;
+        /* color: white; */
+        border-radius: 8px;
+        /* Smooth rounded corners */
+        width: 100px;
+        height: 50px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .logo-container2 a {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+        /* Ensure consistent text color */
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .logo-container2 i {
+        font-size: 24px;
+        /* margin-top: 5px; */
+      }
+
+      .logo-container2:hover {
+        transform: scale(1.05);
+        /* Slightly enlarge on hover */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        background-color: #1976d2;
+        /* Darker shade for hover effect */
+      }
+
+      .logo-container2:active {
+        transform: scale(0.95);
+        /* Slightly shrink on click */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        .logo-container2 {
+          width: 50px;
+          height: 50px;
+        }
+
+        .logo-container2 a {
+          font-size: 14px;
+        }
+
+        .logo-container2 i {
+          font-size: 20px;
+        }
+      }
+
+      .center-text {
+        flex: 1;
+        text-align: center;
+        font-size: 6vw;
+        /* Larger text for header */
+        font-weight: semi-bold;
+        /* Make the text bold */
+        /* text-transform: uppercase; Make the text uppercase */
+        font-family: "Courier New", monospace;
+        color: transparent;
+        /* Make the text color transparent for the effect */
+        position: relative;
+        /* For positioning the light effect */
+        /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 50%,
+          #fff 50%
+        );
+        background-size: 200% 100%;
+        /* Make the gradient double the text size */
+        background-position: -100% 0;
+        /* Start the gradient from the left */
+
+        -webkit-background-clip: text;
+        /* Webkit for compatibility */
+        background-clip: text;
+        /* Clip the background to the text */
+        animation: lightEffect 7s ease-in-out infinite;
+        /* Animation for the light effect */
+      }
+
+      /* Keyframe animation for the light effect */
+      @keyframes lightEffect {
+        0% {
+          background-position: -100% 0;
+          /* Light starts from the left */
+        }
+
+        50% {
+          background-position: 100% 0;
+          /* Light moves to the right */
+        }
+
+        100% {
+          background-position: -100% 0;
+          /* Light returns to the left */
+        }
+      }
     </style>
 </head>
 <body>
-    <h1>Video Call with Stranger</h1>
+    <div class="theme-layout">
+        <div class="postoverlay"></div>
+        <!-- <div class="responsive-header">
+              <div class="mh-head first Sticky">
+                  <div class="header-container">
+                      <span class="logo-container">
+                          <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
+                          <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
+                                  style="color: aqua;"> Saikat</a></p>
+                      </span>
+                      <span class="center-text">unknowns</span>
+                      <span class="logo-container2">
+                          <a href="/video-chat"
+                              style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                              <i class="material-icons">video_call</i>
+                          </a>
+                      </span>
+                  </div>
+              </div>
+          </div>
+          <div class="topbar stick">
+              <div class="logo">
+                  <a title="" href="/"><img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;"
+                          class="center"></a>
+                  <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/" style="color: aqua;"> Saikat</a>
+                  </p>
+              </div>
+              <span class="center-text">unknowns</span>
+              <div class="logo-container2">
+                  <a href="/video-chat"
+                      style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                      <i class="material-icons">video_call</i>
+                  </a>
+              </div>
+          </div> -->
+        <div class="first Sticky" style="background-color: black">
+          <div class="header-container">
+            <span class="logo-container">
+              <a href="/">
+                <img
+                  src="/images/log-modified.jpg"
+                  alt=""
+                  style="height: 60px; min-width: 60px"
+                />
+              </a>
+              <p style="font-size: 10px">
+                developed by<a
+                  href="https://saikat-biswas.vercel.app/"
+                  style="color: aqua"
+                >
+                  Saikat</a
+                >
+              </p>
+            </span>
+            <span class="center-text">unknowns</span>
+  
+            <!-- Video End (Splash) Button -->
+            <button
+              id="disconnectButton"
+              class="logo-container2"
+              style="background-color: red; margin-right: 10px"
+            >
+              <i class="fas fa-video-slash"></i>
+              <!-- Video end icon -->
+            </button>
+  
+            <button
+              id="newChatButton"
+              class="logo-container2"
+              style="background-color: rgb(56, 56, 237)"
+            >
+              <i class="fas fa-video"></i>
+              <!-- New video call icon -->
+            </button>
+  
+            <!-- <span class="logo-container2" id="newChatButton">
+  
     
-    <div>
-        <video id="localVideo" autoplay muted></video>
-        <video id="remoteVideo" autoplay></video>
-    </div>
+                      <a href="/video-chat"
+                          style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
+                          <p style="margin: 0;font-size: 1.2rem;" >New chat</p>
+   
+                      </a>
+                  </span> -->
+            <div class="online-users-counter">
+              <div class="online-indicator"></div>
+              <span class="online-count" id="room-size">0 online</span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- <div id="waitingScreen" class="waiting-screen">
+          <span class="waiting-text">Waiting For Someone...</span>
+      </div> -->
+  
+        <div
+          class="chat-container"
+          style="
+            background-color: #111111;
+            background-image: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.05) 1px,
+                transparent 1px
+              ),
+              linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.05) 1px,
+                transparent 1px
+              );
+            background-size: 20px 20px;
+          "
+        >
+          <div class="video-section">
+            <!-- <div id="waitingScreen" class="waiting-screen">
+              <span class="waiting-text">Waiting For Someone...</span>
+            </div> -->
+            <button id="startCallBtn" disabled>Start Call</button> 
+            <button id="endCallBtn" style="display:none;">End Call</button>
+            <video id="strangerVideo" autoplay playsinline></video>
+            <video id="myVideo" autoplay playsinline muted></video>
+          </div>
+  
+          <div class="chat-section">
+            <div id="messagesContainer" class="messages-container"></div>
+  
+            <div class="input-container">
+              <input
+                type="text"
+                id="messageInput"
+                style="color: #111111"
+                class="message-input"
+                placeholder="Type your message here..."
+              />
+              <button id="sendButton" class="send-button">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
 
-    <button id="startCallBtn" disabled>Start Call</button>  <!-- Initially disabled -->
-    <button id="endCallBtn" style="display:none;">End Call</button>
+    <!-- <button id="startCallBtn" disabled>Start Call</button> 
+    <button id="endCallBtn" style="display:none;">End Call</button> -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -33,8 +524,8 @@
         // const socket = io("https://omegle-clone-isz1.onrender.com");
         const startCallBtn = document.getElementById('startCallBtn');
         const endCallBtn = document.getElementById('endCallBtn');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
+        const localVideo = document.getElementById('myVideo');
+        const remoteVideo = document.getElementById('strangerVideo');
 
         let localStream;
         let peerConnection;
