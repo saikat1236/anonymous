@@ -16,6 +16,52 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
 <style>
+    /* Add this to your existing <style> section in video-chat.ejs */
+.online-users-counter {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 2px solid rgb(139, 92, 246);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.online-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    background-color: rgb(34, 197, 94);
+    animation: pulse 2s infinite;
+}
+
+.online-count {
+    color: white;
+    font-weight: 600;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes countChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+
+
+.count-animate {
+    animation: countChange 0.5s ease-out;
+}
     .waiting-screen {
         position: absolute;
         inset: 0;
@@ -340,6 +386,10 @@
                         <!-- <i class="material-icons">video_call</i> -->
                     </a>
                 </span>
+                <div class="online-users-counter">
+                    <div class="online-indicator"></div>
+                    <span class="online-count">0 users online</span>
+                </div>
             </div>
         </div>
   
@@ -559,6 +609,26 @@
 
         // Initialize
         initLocalStream();
+        // Add this near your other socket listeners
+socket.on('userCount', (count) => {
+    updateUserCount(count);
+});
+
+function updateUserCount(count) {
+    const countElement = document.querySelector('.online-count');
+    if (!countElement) return;
+    
+    // Update text
+    countElement.textContent = `${count} ${count === 1 ? 'user' : 'users'} online`;
+    
+    // Add animation
+    countElement.classList.add('count-animate');
+    
+    // Remove animation class after it completes
+    setTimeout(() => {
+        countElement.classList.remove('count-animate');
+    }, 500);
+}
     </script>
 </body>
 </html>

@@ -18,14 +18,32 @@ const server = http.createServer(app);
 // Initialize Socket.IO with the HTTP server
 const io = new Server(server);
 
-// Log when a client connects or disconnects
-io.on("connection", (socket) => {
-    console.log("A user connected");
 
+
+// Track connected users
+let connectedUsers = 0;
+
+io.on("connection", (socket) => {
+    // Increment user count
+    connectedUsers++;
+    console.log("A user connected. Total users:", connectedUsers);
+    
+    // Broadcast updated count to all clients
+    io.emit('userCount', connectedUsers);
+
+    // Handle disconnection
     socket.on("disconnect", () => {
-        console.log("A user disconnected");
+        // Decrement user count
+        connectedUsers--;
+        console.log("A user disconnected. Total users:", connectedUsers);
+        
+        // Broadcast updated count to all clients
+        io.emit('userCount', connectedUsers);
     });
 });
+
+
+
 
 // Start the server
 server.listen(port, () => {
