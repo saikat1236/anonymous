@@ -15,204 +15,227 @@
     <link rel="stylesheet" href="/css/responsive.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-<style>
-    /* Add this to your existing <style> section in video-chat.ejs */
-.online-users-counter {
-    position: fixed;
-    top: 5rem;
-    right: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    border: 2px solid rgb(139, 92, 246);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
+    <style>
+        /* Add this to your existing <style> section in video-chat.ejs */
+        .online-users-counter {
+            position: fixed;
+            top: 5rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 2px solid rgb(139, 92, 246);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
 
-.online-indicator {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 9999px;
-    background-color: rgb(34, 197, 94);
-    animation: pulse 2s infinite;
-}
+        .online-indicator {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 9999px;
+            background-color: rgb(34, 197, 94);
+            animation: pulse 2s infinite;
+        }
 
-.online-count {
-    color: white;
-    font-weight: 600;
-}
+        .online-count {
+            color: white;
+            font-weight: 600;
+        }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+        @keyframes pulse {
 
-@keyframes countChange {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
+            0%,
+            100% {
+                opacity: 1;
+            }
 
+            50% {
+                opacity: 0.5;
+            }
+        }
 
+        @keyframes countChange {
+            0% {
+                transform: scale(1);
+            }
 
-.count-animate {
-    animation: countChange 0.5s ease-out;
-}
-    .waiting-screen {
-        position: absolute;
-        inset: 0;
-        z-index: 50;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(0, 0, 0,0.01);
-    }
+            50% {
+                transform: scale(1.1);
+            }
 
-    .waiting-text {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 15rem;
-        height: 3rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: white;
-        border-radius: 8rem;
-        animation: pulse 2s infinite;
-        background-color: #2196F3;
-    }
-    .chat-container {
-
-    display: grid;
-    grid-template-rows: 3fr 1fr; /* Video section takes 3 parts; chat takes 1 part */
-    height: 100vh;
-    overflow: hidden;
-}
-
-@media (min-width: 1024px) {
-    .chat-container {
-        grid-template-columns: 3fr 1fr; /* Video section takes 3 parts; chat takes 1 part */
-    }
-}
-
-.video-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background-color: black;
-    height: 85%;
-    margin: 1rem;
-    border-radius: 2rem;
-    outline: 2px solid rgb(167, 139, 250);
-}
+            100% {
+                transform: scale(1);
+            }
+        }
 
 
-#strangerVideo {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    max-height: 100%; /* Prevent video from exceeding the container height */
-    max-width: 100%;  /* Prevent video from exceeding the container width */
-    border-radius: 2rem;
-    object-fit: cover;
-    outline: 2px solid rgb(167, 139, 250);
-}
+
+        .count-animate {
+            animation: countChange 0.5s ease-out;
+        }
+
+        .waiting-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.01);
+        }
+
+        .waiting-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 15rem;
+            height: 3rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            border-radius: 8rem;
+            animation: pulse 2s infinite;
+            background-color: #2196F3;
+        }
+
+        .chat-container {
+
+            display: grid;
+            grid-template-rows: 3fr 1fr;
+            /* Video section takes 3 parts; chat takes 1 part */
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            .chat-container {
+                grid-template-columns: 3fr 1fr;
+                /* Video section takes 3 parts; chat takes 1 part */
+            }
+        }
+
+        .video-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-color: black;
+            height: 85%;
+            margin: 1rem;
+            border-radius: 2rem;
+            outline: 2px solid rgb(167, 139, 250);
+        }
 
 
-#myVideo {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    width: 8rem;
-    height: 8rem;
-    background-color: rgb(243, 232, 255);
-    border-radius: 9999px;
-    object-fit: cover;
-    outline: 2px solid rgb(167, 139, 250);
-    transform: scaleX(-1); /* Mirrors the video horizontally */
-}
-
-@media (min-width: 1024px) {
-    #myVideo {
-        top: 2rem;
-        width: 10rem;
-        height: 10rem;
-        transform: scaleX(-1); /* Mirrors the video horizontally */
-    }
-}
-
-.chat-section {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    overflow-y: visible;
-    padding: 1rem;
-    /* background-color: white; */
-    /* border-top: 2px solid rgb(191, 219, 254); */
-}
+        #strangerVideo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            /* Prevent video from exceeding the container height */
+            max-width: 100%;
+            /* Prevent video from exceeding the container width */
+            border-radius: 2rem;
+            object-fit: cover;
+            outline: 2px solid rgb(167, 139, 250);
+        }
 
 
-@media (min-width: 1024px) {
-    .chat-section {
-        border-top: none;
-        /* border-left: 2px solid rgb(191, 219, 254); */
-        height: 45rem;
-    }
-}
+        #myVideo {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 8rem;
+            height: 8rem;
+            background-color: rgb(243, 232, 255);
+            border-radius: 9999px;
+            object-fit: cover;
+            outline: 2px solid rgb(167, 139, 250);
+            transform: scaleX(-1);
+            /* Mirrors the video horizontally */
+        }
 
-.messages-container {
-    margin-bottom: 5rem;
-    max-height: calc(100% - 6rem);
-    overflow-y: auto;
-}
+        @media (min-width: 1024px) {
+            #myVideo {
+                top: 2rem;
+                width: 10rem;
+                height: 10rem;
+                transform: scaleX(-1);
+                /* Mirrors the video horizontally */
+            }
+        }
 
-.input-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    /* background-color: white; */
-    width: 100%;
-    /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
-}
+        .chat-section {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow-y: visible;
+            padding: 1rem;
+            /* background-color: white; */
+            /* border-top: 2px solid rgb(191, 219, 254); */
+        }
 
-@media (min-width: 1024px) {
-    .input-container {
-        width: 25%;
-        left: auto;
-        right: 0;
-    }
-}
 
-.message-input {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    border: 2px solid rgb(167, 139, 250);
-    border-radius: 1rem;
-}
+        @media (min-width: 1024px) {
+            .chat-section {
+                border-top: none;
+                /* border-left: 2px solid rgb(191, 219, 254); */
+                height: 45rem;
+            }
+        }
 
-.message-input:focus {
-    outline: none;
-}
+        .messages-container {
+            margin-bottom: 5rem;
+            max-height: calc(100% - 6rem);
+            overflow-y: auto;
+        }
 
-.send-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: bold;
-    color: white;
-    background-color: rgb(124, 58, 237);
-    border: 2px solid rgb(167, 139, 250);
-    border-radius: 0.5rem;
-    cursor: pointer;
-}
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            /* background-color: white; */
+            width: 100%;
+            /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
+        }
+
+        @media (min-width: 1024px) {
+            .input-container {
+                width: 25%;
+                left: auto;
+                right: 0;
+            }
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border: 2px solid rgb(167, 139, 250);
+            border-radius: 1rem;
+        }
+
+        .message-input:focus {
+            outline: none;
+        }
+
+        .send-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: white;
+            background-color: rgb(124, 58, 237);
+            border: 2px solid rgb(167, 139, 250);
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
 
 
         /* Floating Button Container */
@@ -222,9 +245,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            width: 100%; /* Ensure it spans the full width */
+            width: 100%;
+            /* Ensure it spans the full width */
             padding: 0 20px;
-            height: 100px; /* Set a consistent height for the header */
+            height: 100px;
+            /* Set a consistent height for the header */
         }
 
         .logo-container {
@@ -235,99 +260,114 @@
         }
 
         .logo-container2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #2196F3;
-    color: white;
-    border-radius: 8px; /* Smooth rounded corners */
-    width: 140px;
-    height: 50px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-    text-align: center;
-}
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 8px;
+            /* Smooth rounded corners */
+            width: 140px;
+            height: 50px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
 
-.logo-container2 a {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    text-decoration: none;
-    color: white; /* Ensure consistent text color */
-    font-size: 16px;
-    font-weight: bold;
-}
+        .logo-container2 a {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            /* Ensure consistent text color */
+            font-size: 16px;
+            font-weight: bold;
+        }
 
-.logo-container2 i {
-    font-size: 24px;
-    margin-top: 5px;
-}
+        .logo-container2 i {
+            font-size: 24px;
+            margin-top: 5px;
+        }
 
-.logo-container2:hover {
-    transform: scale(1.05); /* Slightly enlarge on hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-    background-color: #1976D2; /* Darker shade for hover effect */
-}
+        .logo-container2:hover {
+            transform: scale(1.05);
+            /* Slightly enlarge on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+            background-color: #1976D2;
+            /* Darker shade for hover effect */
+        }
 
-.logo-container2:active {
-    transform: scale(0.95); /* Slightly shrink on click */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
+        .logo-container2:active {
+            transform: scale(0.95);
+            /* Slightly shrink on click */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
 
-@media (max-width: 768px) {
-    .logo-container2 {
-        width: 100px;
-        height: 50px;
-    }
+        @media (max-width: 768px) {
+            .logo-container2 {
+                width: 100px;
+                height: 50px;
+            }
 
-    .logo-container2 a {
-        font-size: 14px;
-    }
+            .logo-container2 a {
+                font-size: 14px;
+            }
 
-    .logo-container2 i {
-        font-size: 20px;
-    }
-}
-
-
-
-		.center-text {
-    flex: 1;
-    text-align: center;
-    font-size: 6vw; /* Larger text for header */
-    font-weight: semi-bold; /* Make the text bold */
-    /* text-transform: uppercase; Make the text uppercase */
-	font-family: 'Courier New', monospace;
-    color: transparent; /* Make the text color transparent for the effect */
-    position: relative; /* For positioning the light effect */
-    /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
-	background: linear-gradient(90deg, rgba(255, 255, 255, 0) 50%, #fff 50%);
-    background-size: 200% 100%; /* Make the gradient double the text size */
-    background-position: -100% 0; /* Start the gradient from the left */
-
-    -webkit-background-clip: text; /* Webkit for compatibility */
-    background-clip: text; /* Clip the background to the text */
-    animation: lightEffect 7s ease-in-out infinite; /* Animation for the light effect */
-}
-
-/* Keyframe animation for the light effect */
-@keyframes lightEffect {
-    0% {
-        background-position: -100% 0; /* Light starts from the left */
-    }
-    50% {
-        background-position: 100% 0; /* Light moves to the right */
-    }
-    100% {
-        background-position: -100% 0; /* Light returns to the left */
-    }
-}
+            .logo-container2 i {
+                font-size: 20px;
+            }
+        }
 
 
 
+        .center-text {
+            flex: 1;
+            text-align: center;
+            font-size: 6vw;
+            /* Larger text for header */
+            font-weight: semi-bold;
+            /* Make the text bold */
+            /* text-transform: uppercase; Make the text uppercase */
+            font-family: 'Courier New', monospace;
+            color: transparent;
+            /* Make the text color transparent for the effect */
+            position: relative;
+            /* For positioning the light effect */
+            /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 50%, #fff 50%);
+            background-size: 200% 100%;
+            /* Make the gradient double the text size */
+            background-position: -100% 0;
+            /* Start the gradient from the left */
 
+            -webkit-background-clip: text;
+            /* Webkit for compatibility */
+            background-clip: text;
+            /* Clip the background to the text */
+            animation: lightEffect 7s ease-in-out infinite;
+            /* Animation for the light effect */
+        }
+
+        /* Keyframe animation for the light effect */
+        @keyframes lightEffect {
+            0% {
+                background-position: -100% 0;
+                /* Light starts from the left */
+            }
+
+            50% {
+                background-position: 100% 0;
+                /* Light moves to the right */
+            }
+
+            100% {
+                background-position: -100% 0;
+                /* Light returns to the left */
+            }
+        }
     </style>
 
 </head>
@@ -372,8 +412,8 @@
             <div class="header-container">
                 <span class="logo-container">
                     <a href="/">
-                    <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
-                </a>
+                        <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
+                    </a>
                     <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
                             style="color: aqua;"> Saikat</a></p>
                 </span>
@@ -381,7 +421,8 @@
 
 
                 <button id="disconnectButton" class="logo-container2" style="background-color: red;">Disconnect</button>
-                <button id="newChatButton" class="logo-container2" style="background-color: rgb(56, 56, 237);">New chat</button>
+                <button id="newChatButton" class="logo-container2" style="background-color: rgb(56, 56, 237);">New
+                    chat</button>
                 <!-- <span class="logo-container2" id="newChatButton">
 
   
@@ -397,73 +438,74 @@
                 </div>
             </div>
         </div>
-  
-    <!-- <div id="waitingScreen" class="waiting-screen">
+
+        <!-- <div id="waitingScreen" class="waiting-screen">
         <span class="waiting-text">Waiting For Someone...</span>
     </div> -->
 
-    <div class="chat-container" style="background-color: #111111;
+        <div class="chat-container" style="background-color: #111111;
     background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
     background-size: 20px 20px;">
-        <div class="video-section">
+            <div class="video-section">
                 <div id="waitingScreen" class="waiting-screen">
-        <span class="waiting-text">Waiting For Someone...</span>
-    </div>
-            <video id="strangerVideo" autoplay playsinline></video>
-            <video id="myVideo" autoplay playsinline muted></video>
-        </div>
+                    <span class="waiting-text">Waiting For Someone...</span>
+                </div>
+                <video id="strangerVideo" autoplay playsinline></video>
+                <video id="myVideo" autoplay playsinline muted></video>
+            </div>
 
-        <div class="chat-section">
-            <div id="messagesContainer" class="messages-container"></div>
-            
-            <div class="input-container">
-                <input type="text" id="messageInput" style="color: #111111;" class="message-input" placeholder="Type your message here...">
-                <button id="sendButton" class="send-button">Send</button>
+            <div class="chat-section">
+                <div id="messagesContainer" class="messages-container"></div>
+
+                <div class="input-container">
+                    <input type="text" id="messageInput" style="color: #111111;" class="message-input"
+                        placeholder="Type your message here...">
+                    <button id="sendButton" class="send-button">Send</button>
+                </div>
             </div>
         </div>
-    </div>
     </div>
 
     <script>
         const socket = io('https://omegle-clone-isz1.onrender.com');
 
         socket.on('online:size', (size) => {
-  console.log('online no:', size);
-  // Update UI with the roomArr size
-  document.getElementById('room-size').textContent = `${size} online`;
-});
-socket.on('roomArr:size', (size) => {
-  console.log('Room array size:', size);
-  // Update UI with the roomArr size
-});
-    // Handle the disconnect button click
-    document.getElementById('disconnectButton').addEventListener('click', () => {
-        console.log('Disconnected from server');
-        socket.emit('disconnect:manual');
-        window.location.href = '/';
-});
+            console.log('online no:', size);
+            // Update UI with the roomArr size
+            document.getElementById('room-size').textContent = `${size} online`;
+        });
+        socket.on('roomArr:size', (size) => {
+            console.log('Room array size:', size);
+            // Update UI with the roomArr size
+        });
+        // Handle the disconnect button click
+        document.getElementById('disconnectButton').addEventListener('click', () => {
+            console.log('Disconnected from server');
+            socket.emit('disconnect:manual');
+            window.location.href = '/';
+        });
 
-document.getElementById('newChatButton').addEventListener('click', () => {
+        document.getElementById('newChatButton').addEventListener('click', () => {
 
-    // Notify the server to disconnect the user
-    if (socket && socket.connected) {
-        // socket.emit('disconnect');
-        // socket.disconnect(); // Closes the connection locally
-        console.log('Disconnected from server');
-        socket.emit('disconnect:manual');
-        window.location.href = '/';
-    }
-    
-    // Clear the chat UI or reset for a new session
-    // document.querySelector('.messages-container').innerHTML = ''; // Clear messages
-    // document.querySelector('#strangerVideo').srcObject = null; // Stop stranger's video
-    // document.querySelector('#myVideo').srcObject = null; // Stop user's video
-    
-    // Optionally, redirect or reset the page
-    console.log('Chat reset for a new session.');
-});
+            // Notify the server to disconnect the user
+            if (socket && socket.connected) {
+                // socket.emit('disconnect');
+                // socket.disconnect(); // Closes the connection locally
+                console.log('Disconnected from server');
+                socket.emit('disconnect:manual');
+                window.location.href = '/video-chat';
+            }
+
+            // Clear the chat UI or reset for a new session
+            // document.querySelector('.messages-container').innerHTML = ''; // Clear messages
+            // document.querySelector('#strangerVideo').srcObject = null; // Stop stranger's video
+            // document.querySelector('#myVideo').srcObject = null; // Stop user's video
+
+            // Optionally, redirect or reset the page
+            console.log('Chat reset for a new session.');
+        });
 
         let peer = null;
         let type = null;
@@ -481,30 +523,30 @@ document.getElementById('newChatButton').addEventListener('click', () => {
         };
 
         // const peerConnection = new RTCPeerConnection(configuration);
-       // Monitor ICE connection state changes
-// peerConnection.oniceconnectionstatechange = () => {
-//   console.log('ICE Connection State:', peerConnection.iceConnectionState);
-// };
+        // Monitor ICE connection state changes
+        // peerConnection.oniceconnectionstatechange = () => {
+        //   console.log('ICE Connection State:', peerConnection.iceConnectionState);
+        // };
 
-// // Monitor overall connection state changes
-// peerConnection.onconnectionstatechange = () => {
-//   console.log('Connection State:', peerConnection.connectionState);
+        // // Monitor overall connection state changes
+        // peerConnection.onconnectionstatechange = () => {
+        //   console.log('Connection State:', peerConnection.connectionState);
 
-//   switch (peerConnection.connectionState) {
-//     case 'connected':
-//       console.log('Peers are connected!');
-//       break;
-//     case 'disconnected':
-//       console.log('Peer disconnected.');
-//       break;
-//     case 'failed':
-//       console.error('Connection failed.');
-//       break;
-//     case 'closed':
-//       console.log('Connection closed.');
-//       break;
-//   }
-// };
+        //   switch (peerConnection.connectionState) {
+        //     case 'connected':
+        //       console.log('Peers are connected!');
+        //       break;
+        //     case 'disconnected':
+        //       console.log('Peer disconnected.');
+        //       break;
+        //     case 'failed':
+        //       console.error('Connection failed.');
+        //       break;
+        //     case 'closed':
+        //       console.log('Connection closed.');
+        //       break;
+        //   }
+        // };
 
         // DOM elements
         const myVideo = document.getElementById('myVideo');
@@ -550,6 +592,7 @@ document.getElementById('newChatButton').addEventListener('click', () => {
             // Handle incoming tracks
             peer.ontrack = (e) => {
                 console.log('Received remote track:', e.streams[0]);
+                console.log('Stranger Video',strangerVideo);
                 if (strangerVideo && e.streams[0]) {
                     console.log('strangerVideo is here');
                     strangerVideo.srcObject = e.streams[0];
@@ -560,7 +603,7 @@ document.getElementById('newChatButton').addEventListener('click', () => {
             peer.onicecandidate = (e) => {
                 if (e.candidate) {
                     console.log('Generated ICE candidate:', e.candidate);
-                    socket.emit('ice:send', { candidate: e.candidate ,to: remoteSocket });
+                    socket.emit('ice:send', { candidate: e.candidate, to: remoteSocket });
                 }
             };
 
@@ -585,7 +628,7 @@ document.getElementById('newChatButton').addEventListener('click', () => {
         // Handle SDP exchange
         socket.on('sdp:reply', async ({ sdp }) => {
             if (!peer) return;
-            
+
             try {
                 console.log('Received SDP:', sdp.type);
                 await peer.setRemoteDescription(new RTCSessionDescription(sdp));
@@ -604,7 +647,7 @@ document.getElementById('newChatButton').addEventListener('click', () => {
         // Handle ICE candidates
         socket.on('ice:reply', async ({ candidate }) => {
             if (!peer || !candidate) return;
-            
+
             try {
                 console.log('Received ICE candidate');
                 await peer.addIceCandidate(new RTCIceCandidate(candidate));
@@ -628,7 +671,7 @@ document.getElementById('newChatButton').addEventListener('click', () => {
         function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
-            
+
             socket.emit('send-message', message, type, roomId);
             addMessage(message, 'You');
             messageInput.value = '';
@@ -652,27 +695,26 @@ document.getElementById('newChatButton').addEventListener('click', () => {
         // Initialize
         initLocalStream();
         // Add this near your other socket listeners
-socket.on('userCount', (count) => {
-    updateUserCount(count);
-});
+        socket.on('userCount', (count) => {
+            updateUserCount(count);
+        });
 
-function updateUserCount(count) {
-    const countElement = document.querySelector('.online-count');
-    if (!countElement) return;
-    
-    // Update text
-    countElement.textContent = `${count} ${count === 1 ? 'user' : 'users'} online`;
-    
-    // Add animation
-    countElement.classList.add('count-animate');
-    
-    // Remove animation class after it completes
-    setTimeout(() => {
-        countElement.classList.remove('count-animate');
-    }, 500);
-}
+        function updateUserCount(count) {
+            const countElement = document.querySelector('.online-count');
+            if (!countElement) return;
+
+            // Update text
+            countElement.textContent = `${count} ${count === 1 ? 'user' : 'users'} online`;
+
+            // Add animation
+            countElement.classList.add('count-animate');
+
+            // Remove animation class after it completes
+            setTimeout(() => {
+                countElement.classList.remove('count-animate');
+            }, 500);
+        }
     </script>
 </body>
+
 </html>
-
-
