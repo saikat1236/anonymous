@@ -141,7 +141,7 @@ section {
 
 .gap {
     float: left;
-    padding: 30px 0;
+    /* padding: 30px 0; */
     position: relative;
     width: 100%;
 }
