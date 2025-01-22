@@ -5,32 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Call</title>
     <style>
-        video {
-            width: 400px;
-            height: 300px;
+        /* Reset margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        /* Basic body and container setup */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Container for video elements */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+
+        /* Local video styling */
+        #localVideo {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Remote video styling */
         #remoteVideo {
             position: absolute;
             top: 10px;
             right: 10px;
+            width: 30%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Buttons styling */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            margin: 10px auto;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Hide the End call button initially */
+        #endCallBtn {
+            display: none;
+        }
+
+        /* Media Query for mobile responsiveness */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .video-container {
+                margin-bottom: 15px;
+            }
+
+            #localVideo {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            #remoteVideo {
+                width: 40%;
+                top: 10px;
+                right: 10px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 16px;
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Video Call with Stranger</h1>
-    
-    <div>
+
+    <div class="video-container">
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay></video>
     </div>
 
-    <button id="startCallBtn" disabled>Start Call</button>  <!-- Initially disabled -->
-    <button id="endCallBtn" style="display:none;">End Call</button>
+    <button id="startCallBtn" disabled>Start Call</button>
+    <button id="endCallBtn">End Call</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        // const socket = io("https://omegle-clone-isz1.onrender.com");
         const startCallBtn = document.getElementById('startCallBtn');
         const endCallBtn = document.getElementById('endCallBtn');
         const localVideo = document.getElementById('localVideo');
@@ -38,7 +132,7 @@
 
         let localStream;
         let peerConnection;
-        let users = []; // Initialize the users array
+        let users = []; 
 
         const config = {
             iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -55,7 +149,6 @@
         // Start call button
         startCallBtn.addEventListener('click', () => {
             if (users.length > 1) {
-                isCaller = true;
                 startCall();
             } else {
                 alert('No users available for a call');
@@ -82,7 +175,7 @@
                     return peerConnection.setLocalDescription(offer);
                 })
                 .then(() => {
-                    socket.emit('offer', peerConnection.localDescription, users[1]); // Send to the second user (you can dynamically assign users)
+                    socket.emit('offer', peerConnection.localDescription, users[1]);
                 })
                 .catch(error => console.log(error));
         }
@@ -145,10 +238,7 @@
 
         // Receive the list of connected users
         socket.on('users', (userList) => {
-            users = userList;  // Update the users array with the connected users
-            console.log('Connected users:', users);
-
-            // Enable the "Start Call" button if there is at least one other user
+            users = userList;  
             if (users.length > 1) {
                 startCallBtn.disabled = false;  // Enable the button
             } else {
