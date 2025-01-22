@@ -671,39 +671,61 @@
           roomId = id;
         });
       
-        // Handle SDP exchange
-        socket.on("sdp:reply", async ({ sdp }) => {
+        let iceCandidatesBuffer = [];
+
+socket.on("ice:reply", async ({ candidate }) => {
+  if (candidate) {
+    // Check if remote description is set
+    if (peer.remoteDescription) {
+      try {
+        // Add ICE candidate when remote description is set
+        await peer.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log("ICE candidate added successfully.");
+      } catch (err) {
+        console.error("Error adding ICE candidate:", err);
+      }
+    } else {
+      // Buffer the ICE candidate if the remote description isn't set yet
+      console.log("Buffering ICE candidate until remote description is set.");
+      iceCandidatesBuffer.push(candidate);
+    }
+  }
+});
+
+// Handle SDP exchange and set remote description
+socket.on("sdp:reply", async ({ sdp }) => {
   if (!peer) return;
 
   try {
-    if (sdp.type === "offer" && peer.signalingState === "stable") {
-      console.log("Received offer, creating answer...");
-      await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+    // Set the remote description (offer or answer)
+    console.log("Received SDP:", sdp.type);
+    await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+
+    // Process any buffered ICE candidates
+    if (iceCandidatesBuffer.length > 0) {
+      iceCandidatesBuffer.forEach(async (candidate) => {
+        try {
+          await peer.addIceCandidate(new RTCIceCandidate(candidate));
+          console.log("Buffered ICE candidate added successfully.");
+        } catch (err) {
+          console.error("Error adding buffered ICE candidate:", err);
+        }
+      });
+      iceCandidatesBuffer = []; // Clear the buffer after processing
+    }
+
+    // If this was an offer, create an answer
+    if (sdp.type === "offer") {
+      console.log("Creating answer as p2");
       const answer = await peer.createAnswer();
       await peer.setLocalDescription(answer);
       socket.emit("sdp:send", { sdp: answer });
-    } else if (sdp.type === "answer" && peer.signalingState === "have-remote-offer") {
-      console.log("Received answer, setting remote description...");
-      await peer.setRemoteDescription(new RTCSessionDescription(sdp));
     }
   } catch (error) {
     console.error("Error handling SDP:", error);
   }
 });
 
-      
-        // Handle ICE candidates
-        socket.on("ice:reply", async ({ candidate }) => {
-          if (candidate) {
-            try {
-              await peer.addIceCandidate(new RTCIceCandidate(candidate));
-              console.log("ICE candidate added successfully.");
-            } catch (err) {
-              console.error("Error adding ICE candidate:", err);
-            }
-          }
-        });
-      
         // Handle incoming messages
         socket.on("get-message", (input) => {
           addMessage(input, "Stranger");
