@@ -23,23 +23,49 @@ const io = new Server(server);
 // Track connected users
 let connectedUsers = 0;
 
-io.on("connection", (socket) => {
-    // Increment user count
-    connectedUsers++;
-    console.log("A user connected. Total users:", connectedUsers);
+// io.on("connection", (socket) => {
+//     // Increment user count
+//     connectedUsers++;
+//     console.log("A user connected. Total users:", connectedUsers);
     
-    // Broadcast updated count to all clients
-    io.emit('userCount', connectedUsers);
+//     // Broadcast updated count to all clients
+//     io.emit('userCount', connectedUsers);
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
-        // Decrement user count
-        connectedUsers--;
-        console.log("A user disconnected. Total users:", connectedUsers);
+//     // Handle disconnection
+//     socket.on("disconnect", () => {
+//         // Decrement user count
+//         connectedUsers--;
+//         console.log("A user disconnected. Total users:", connectedUsers);
         
-        // Broadcast updated count to all clients
-        io.emit('userCount', connectedUsers);
-    });
+//         // Broadcast updated count to all clients
+//         io.emit('userCount', connectedUsers);
+//     });
+// });
+
+// Socket.IO signaling
+let users = [];
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  users.push(socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+    users = users.filter(user => user !== socket.id);
+  });
+
+  // Handle signaling messages
+  socket.on('offer', (offer, toSocketId) => {
+    io.to(toSocketId).emit('offer', offer, socket.id);
+  });
+
+  socket.on('answer', (answer, toSocketId) => {
+    io.to(toSocketId).emit('answer', answer);
+  });
+
+  socket.on('candidate', (candidate, toSocketId) => {
+    io.to(toSocketId).emit('candidate', candidate);
+  });
 });
 
 

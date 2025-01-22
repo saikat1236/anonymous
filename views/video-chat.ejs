@@ -514,277 +514,323 @@
     </div>
 
     <script>
-        const socket = io("https://omegle-clone-isz1.onrender.com");
-      
-        socket.on("online:size", (size) => {
-          console.log("online no:", size);
-          // Update UI with the roomArr size
-          document.getElementById("room-size").textContent = `${size} online`;
-        });
-      
-        socket.on("roomArr:size", (size) => {
-          console.log("Room array size:", size);
-          // Update UI with the roomArr size
-        });
-      
-        // Handle the disconnect button click
-        document
-          .getElementById("disconnectButton")
-          .addEventListener("click", () => {
-            console.log("Disconnected from server");
-            socket.emit("disconnect:manual");
-            window.location.href = "/video-chat";
-          });
-      
-        document.getElementById("newChatButton").addEventListener("click", () => {
-          // Notify the server to disconnect the user
-          if (socket && socket.connected) {
-            console.log("Disconnected from server");
-            socket.emit("disconnect:manual");
-            window.location.href = "/video-chat";
-          }
-      
-          // Reset chat UI or clear state for a new session
-          console.log("Chat reset for a new session.");
-        });
-      
-        let peer;
-        let type = null;
-        let roomId = null;
-        let localStream;
-        let tracksAdded = false;  // Flag to ensure tracks are added once
-      
-        const configuration = {
-          iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" },
-            { urls: "stun:stun2.l.google.com:19302" },
-            { urls: "stun:stun3.l.google.com:19302" },
-            { urls: "stun:stun4.l.google.com:19302" },
-          ],
-        };
-      
-        const myVideo = document.getElementById("myVideo");
-        const strangerVideo = document.getElementById("strangerVideo");
-        const waitingScreen = document.getElementById("waitingScreen");
-        const messagesContainer = document.getElementById("messagesContainer");
-        const messageInput = document.getElementById("messageInput");
-        const sendButton = document.getElementById("sendButton");
-      
-        async function initializeLocalStream() {
-          // Check if the browser supports media devices
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            try {
-              // Request the local media stream (audio and video)
-              localStream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-              });
-              console.log("Local stream obtained:", localStream);
-      
-              // Set the local stream to the myVideo element
-              myVideo.srcObject = localStream;
-      
-              // Initialize the peer connection after obtaining the local stream
-              peer = new RTCPeerConnection(configuration);
-      
-              // Add tracks to the peer connection only once
-              if (!tracksAdded) {
-                localStream.getTracks().forEach((track) => {
-                  console.log("Adding track:", track);
-                  peer.addTrack(track, localStream);
-                });
-                tracksAdded = true; // Set the flag after adding tracks
-              }
-            } catch (err) {
-              console.error("Error accessing media devices:", err);
-            }
-          } else {
-            console.error("Media devices not supported in this browser.");
-          }
-        }
-      
-        // Call this function to initialize the local stream
-        initializeLocalStream();
-      
-        // Initialize socket connection
-        socket.emit("start", (person) => {
-          console.log("Started as:", person);
-          type = person;
-        });
-      
-        // Handle remote connection
-        socket.on("remote-socket", async (id) => {
-          remoteSocket = id;
-          console.log("Connected to remote socket:", id);
-          waitingScreen.style.display = "none";
-      
-          // Only create a new peer if not already initialized
-          if (!peer) {
-            peer = new RTCPeerConnection(configuration);
-          }
-      
-          // Ensure tracks are only added once
-          if (!tracksAdded && localStream) {
-            localStream.getTracks().forEach((track) => {
-              peer.addTrack(track, localStream);
-            });
-            tracksAdded = true;
-          }
-      
-          // Handle incoming tracks
-          peer.ontrack = (event) => {
-            if (event.streams && event.streams[0]) {
-              strangerVideo.srcObject = event.streams[0];
-              console.log("Received remote stream:", event.streams[0]);
-            } else {
-              console.error("No remote stream found in event:", event);
-            }
-          };
-      
-          // Handle ICE candidates
-          peer.onicecandidate = (e) => {
-            if (e.candidate) {
-              console.log("Generated ICE candidate:", e.candidate);
-              socket.emit("ice:send", {
-                candidate: e.candidate,
-                to: remoteSocket,
-              });
-            }
-          };
-      
-          // If we're p1, create and send the offer
-          if (type === "p1") {
-            try {
-              const offer = await peer.createOffer();
-              await peer.setLocalDescription(offer);
-              socket.emit("sdp:send", { sdp: offer });
-            } catch (err) {
-              console.error("Error creating offer:", err);
-            }
-          }
-        });
-      
-        // Handle room ID
-        socket.on("roomid", (id) => {
-          console.log("Joined room:", id);
-          roomId = id;
-        });
-      
-        let iceCandidatesBuffer = [];
+      const socket = io("https://omegle-clone-isz1.onrender.com");
 
-socket.on("ice:reply", async ({ candidate }) => {
-  if (candidate) {
-    // Check if remote description is set
-    if (peer.remoteDescription) {
-      try {
-        // Add ICE candidate when remote description is set
-        await peer.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log("ICE candidate added successfully.");
-      } catch (err) {
-        console.error("Error adding ICE candidate:", err);
-      }
-    } else {
-      // Buffer the ICE candidate if the remote description isn't set yet
-      console.log("Buffering ICE candidate until remote description is set.");
-      iceCandidatesBuffer.push(candidate);
-    }
-  }
-});
-
-// Handle SDP exchange and set remote description
-socket.on("sdp:reply", async ({ sdp }) => {
-  if (!peer) return;
-
-  try {
-    // Set the remote description (offer or answer)
-    console.log("Received SDP:", sdp.type);
-    await peer.setRemoteDescription(new RTCSessionDescription(sdp));
-
-    // Process any buffered ICE candidates
-    if (iceCandidatesBuffer.length > 0) {
-      iceCandidatesBuffer.forEach(async (candidate) => {
-        try {
-          await peer.addIceCandidate(new RTCIceCandidate(candidate));
-          console.log("Buffered ICE candidate added successfully.");
-        } catch (err) {
-          console.error("Error adding buffered ICE candidate:", err);
-        }
+      socket.on("online:size", (size) => {
+        console.log("online no:", size);
+        // Update UI with the roomArr size
+        document.getElementById("room-size").textContent = `${size} online`;
       });
-      iceCandidatesBuffer = []; // Clear the buffer after processing
-    }
 
-    // If this was an offer, create an answer
-    if (sdp.type === "offer") {
-      console.log("Creating answer as p2");
-      const answer = await peer.createAnswer();
-      await peer.setLocalDescription(answer);
-      socket.emit("sdp:send", { sdp: answer });
-    }
-  } catch (error) {
-    console.error("Error handling SDP:", error);
-  }
-});
+      socket.on("roomArr:size", (size) => {
+        console.log("Room array size:", size);
+        // Update UI with the roomArr size
+      });
 
-        // Handle incoming messages
-        socket.on("get-message", (input) => {
-          addMessage(input, "Stranger");
-        });
-      
-        // Handle disconnection
-        socket.on("disconnected", () => {
+      // Handle the disconnect button click
+      document
+        .getElementById("disconnectButton")
+        .addEventListener("click", () => {
           console.log("Disconnected from server");
+          socket.emit("disconnect:manual");
           window.location.href = "/video-chat";
         });
-      
-        // Send message function
-        function sendMessage() {
-          const message = messageInput.value.trim();
-          if (!message) return;
-      
-          socket.emit("send-message", message, type, roomId);
-          addMessage(message, "You");
-          messageInput.value = "";
+
+      document.getElementById("newChatButton").addEventListener("click", () => {
+        // Notify the server to disconnect the user
+        if (socket && socket.connected) {
+          console.log("Disconnected from server");
+          socket.emit("disconnect:manual");
+          window.location.href = "/video-chat";
         }
-      
-        // Add message to chat
-        function addMessage(text, sender) {
-          const messageDiv = document.createElement("div");
-          messageDiv.className = "message";
-          messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-          messagesContainer.appendChild(messageDiv);
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Reset chat UI or clear state for a new session
+        console.log("Chat reset for a new session.");
+      });
+
+      let peer;
+      let type = null;
+      let roomId = null;
+      let localStream;
+      let tracksAdded = false; // Flag to ensure tracks are added once
+
+      const configuration = {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+          { urls: "stun:stun2.l.google.com:19302" },
+          { urls: "stun:stun3.l.google.com:19302" },
+          { urls: "stun:stun4.l.google.com:19302" },
+        ],
+      };
+
+      const myVideo = document.getElementById("myVideo");
+      const strangerVideo = document.getElementById("strangerVideo");
+      const waitingScreen = document.getElementById("waitingScreen");
+      const messagesContainer = document.getElementById("messagesContainer");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
+
+      async function initializeLocalStream() {
+        // Check if the browser supports media devices
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            // Request the local media stream (audio and video)
+            localStream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: true,
+            });
+            console.log("Local stream obtained:", localStream);
+
+            // Set the local stream to the myVideo element
+            myVideo.srcObject = localStream;
+
+            // Initialize the peer connection after obtaining the local stream
+            peer = new RTCPeerConnection(configuration);
+
+            // Add tracks to the peer connection only once
+            if (!tracksAdded) {
+              localStream.getTracks().forEach((track) => {
+                console.log("Adding track1:", track);
+                peer.addTrack(track, localStream);
+              });
+              tracksAdded = true; // Set the flag after adding tracks
+            }
+          } catch (err) {
+            console.error("Error accessing media devices:", err);
+          }
+        } else {
+          console.error("Media devices not supported in this browser.");
         }
-      
-        // Event listeners
-        sendButton.addEventListener("click", sendMessage);
-        messageInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") sendMessage();
-        });
-      
-        // Handle user count
-        socket.on("userCount", (count) => {
-          updateUserCount(count);
-        });
-      
-        function updateUserCount(count) {
-          const countElement = document.querySelector(".online-count");
-          if (!countElement) return;
-      
-          // Update text
-          countElement.textContent = `${count} ${
-            count === 1 ? "user" : "users"
-          } online`;
-      
-          // Add animation
-          countElement.classList.add("count-animate");
-      
-          // Remove animation class after it completes
-          setTimeout(() => {
-            countElement.classList.remove("count-animate");
-          }, 500);
+      }
+
+      // Call this function to initialize the local stream
+      initializeLocalStream();
+
+      // Initialize socket connection
+      socket.emit("start", (person) => {
+        console.log("Started as:", person);
+        type = person;
+      });
+
+      // Handle remote connection
+      socket.on("remote-socket", async (id) => {
+        remoteSocket = id;
+        console.log("Connected to remote socket:", id);
+        waitingScreen.style.display = "none";
+
+        // Only create a new peer if not already initialized
+        if (!peer) {
+          peer = new RTCPeerConnection(configuration);
         }
-      </script>
-      
+
+        // Ensure tracks are only added once
+        if (!tracksAdded && localStream) {
+          localStream.getTracks().forEach((track) => {
+            console.log("Adding track2:", track);
+            peer.addTrack(track, localStream);
+          });
+          tracksAdded = true;
+        }
+
+        // Ensure the remote socket is properly connected before proceeding
+        console.log("Remote socket connection established, waiting for media.");
+
+        // Handle incoming tracks
+        peer.ontrack = (event) => {
+          console.log("Received track event:", event);
+
+          // Check if the stream exists and has tracks
+          if (event.streams && event.streams[0]) {
+            const remoteStream = event.streams[0];
+            console.log("Remote stream:", remoteStream);
+
+            // Check if video or audio tracks are present
+            const hasVideo = remoteStream.getVideoTracks().length > 0;
+            const hasAudio = remoteStream.getAudioTracks().length > 0;
+
+            if (hasVideo) {
+              console.log(
+                "Video track found:",
+                remoteStream.getVideoTracks()[0]
+              );
+            } else {
+              console.log("No video track found in remote stream.");
+            }
+
+            if (hasAudio) {
+              console.log(
+                "Audio track found:",
+                remoteStream.getAudioTracks()[0]
+              );
+            } else {
+              console.log("No audio track found in remote stream.");
+            }
+
+            // Set the remote stream to the video element
+            const strangerVideo = document.getElementById("strangerVideo");
+            if (strangerVideo) {
+              strangerVideo.srcObject = remoteStream;
+              console.log("Set remote stream to video element.");
+            } else {
+              console.error("strangerVideo element not found!");
+            }
+          } else {
+            console.error("No remote stream found in event:", event);
+          }
+
+        //   // Additional log for RTCTrackEvent properties (optional)
+        //   console.log("Track kind:", event.track.kind); // 'audio' or 'video'
+        //   console.log("Track label:", event.track.label); // Track label (e.g., 'audio' or 'video')
+        //   console.log("Track ID:", event.track.id); // Track ID
+        //   console.log("Track enabled:", event.track.enabled); // Whether the track is enabled
+        //   console.log("Track readyState:", event.track.readyState);
+        };
+
+        // Handle ICE candidates
+        peer.onicecandidate = (e) => {
+          if (e.candidate) {
+            console.log("Generated ICE candidate:", e.candidate);
+            socket.emit("ice:send", {
+              candidate: e.candidate,
+              to: remoteSocket,
+            });
+          }
+        };
+
+        // If we're p1, create and send the offer
+        if (type === "p1") {
+          try {
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            socket.emit("sdp:send", { sdp: offer });
+          } catch (err) {
+            console.error("Error creating offer:", err);
+          }
+        }
+      });
+
+      // Handle room ID
+      socket.on("roomid", (id) => {
+        console.log("Joined room:", id);
+        roomId = id;
+      });
+
+      let iceCandidatesBuffer = [];
+
+      socket.on("ice:reply", async ({ candidate }) => {
+        if (candidate) {
+          // Check if remote description is set
+          if (peer.remoteDescription) {
+            try {
+              // Add ICE candidate when remote description is set
+              await peer.addIceCandidate(new RTCIceCandidate(candidate));
+              console.log("ICE candidate added successfully.");
+            } catch (err) {
+              console.error("Error adding ICE candidate:", err);
+            }
+          } else {
+            // Buffer the ICE candidate if the remote description isn't set yet
+            console.log(
+              "Buffering ICE candidate until remote description is set."
+            );
+            iceCandidatesBuffer.push(candidate);
+          }
+        }
+      });
+
+      // Handle SDP exchange and set remote description
+      socket.on("sdp:reply", async ({ sdp }) => {
+        if (!peer) return;
+
+        try {
+          // Set the remote description (offer or answer)
+          console.log("Received SDP:", sdp.type);
+          await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+
+          // Process any buffered ICE candidates
+          if (iceCandidatesBuffer.length > 0) {
+            iceCandidatesBuffer.forEach(async (candidate) => {
+              try {
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+                console.log("Buffered ICE candidate added successfully.");
+              } catch (err) {
+                console.error("Error adding buffered ICE candidate:", err);
+              }
+            });
+            iceCandidatesBuffer = []; // Clear the buffer after processing
+          }
+
+          // If this was an offer, create an answer
+          if (sdp.type === "offer") {
+            console.log("Creating answer as p2");
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+            socket.emit("sdp:send", { sdp: answer });
+          }
+        } catch (error) {
+          console.error("Error handling SDP:", error);
+        }
+      });
+
+      // Handle incoming messages
+      socket.on("get-message", (input) => {
+        addMessage(input, "Stranger");
+      });
+
+      // Handle disconnection
+      socket.on("disconnected", () => {
+        console.log("Disconnected from server");
+        window.location.href = "/video-chat";
+      });
+
+      // Send message function
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        socket.emit("send-message", message, type, roomId);
+        addMessage(message, "You");
+        messageInput.value = "";
+      }
+
+      // Add message to chat
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message";
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Event listeners
+      sendButton.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      // Handle user count
+      socket.on("userCount", (count) => {
+        updateUserCount(count);
+      });
+
+      function updateUserCount(count) {
+        const countElement = document.querySelector(".online-count");
+        if (!countElement) return;
+
+        // Update text
+        countElement.textContent = `${count} ${
+          count === 1 ? "user" : "users"
+        } online`;
+
+        // Add animation
+        countElement.classList.add("count-animate");
+
+        // Remove animation class after it completes
+        setTimeout(() => {
+          countElement.classList.remove("count-animate");
+        }, 500);
+      }
+    </script>
   </body>
 </html>

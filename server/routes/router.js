@@ -8,7 +8,9 @@ const {Userdb} = require("../models/model");
 route.get('/video-chat', (req, res) => {
     res.render('video-chat');
 });
-
+route.get('/test', (req, res) => {
+    res.render('test');
+});
 route.get("/", function (req, res, next) {
 
     var teamId = req.params.id;

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call</title>
+    <style>
+        video {
+            width: 400px;
+            height: 300px;
+        }
+        #remoteVideo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Call with Stranger</h1>
+    
+    <div>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+
+    <button id="startCallBtn" disabled>Start Call</button>  <!-- Initially disabled -->
+    <button id="endCallBtn" style="display:none;">End Call</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        // const socket = io("https://omegle-clone-isz1.onrender.com");
+        const startCallBtn = document.getElementById('startCallBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+
+        let localStream;
+        let peerConnection;
+        let users = []; // Initialize the users array
+
+        const config = {
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        };
+
+        // Set up local video stream
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+            })
+            .catch(error => console.log(error));
+
+        // Start call button
+        startCallBtn.addEventListener('click', () => {
+            if (users.length > 1) {
+                isCaller = true;
+                startCall();
+            } else {
+                alert('No users available for a call');
+            }
+        });
+
+        // End call button
+        endCallBtn.addEventListener('click', () => {
+            endCall();
+        });
+
+        // Start a new call
+        function startCall() {
+            peerConnection = new RTCPeerConnection(config);
+            peerConnection.addEventListener('icecandidate', handleIceCandidate);
+            peerConnection.addEventListener('track', handleTrack);
+
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            peerConnection.createOffer()
+                .then(offer => {
+                    return peerConnection.setLocalDescription(offer);
+                })
+                .then(() => {
+                    socket.emit('offer', peerConnection.localDescription, users[1]); // Send to the second user (you can dynamically assign users)
+                })
+                .catch(error => console.log(error));
+        }
+
+        // Handle ICE Candidate
+        function handleIceCandidate(event) {
+            if (event.candidate) {
+                socket.emit('candidate', event.candidate, users[1]);
+            }
+        }
+
+        // Handle incoming media track
+        function handleTrack(event) {
+            remoteVideo.srcObject = event.streams[0];
+        }
+
+        // Handle offer from another peer
+        socket.on('offer', (offer, fromSocketId) => {
+            peerConnection = new RTCPeerConnection(config);
+            peerConnection.addEventListener('icecandidate', handleIceCandidate);
+            peerConnection.addEventListener('track', handleTrack);
+
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+                .then(() => peerConnection.createAnswer())
+                .then(answer => {
+                    return peerConnection.setLocalDescription(answer);
+                })
+                .then(() => {
+                    socket.emit('answer', peerConnection.localDescription, fromSocketId);
+                })
+                .catch(error => console.log(error));
+        });
+
+        // Handle answer from another peer
+        socket.on('answer', (answer) => {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                .catch(error => console.log(error));
+        });
+
+        // Handle ICE Candidate from another peer
+        socket.on('candidate', (candidate) => {
+            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                .catch(error => console.log(error));
+        });
+
+        // End the call
+        function endCall() {
+            peerConnection.close();
+            peerConnection = null;
+            localStream.getTracks().forEach(track => track.stop());
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+            startCallBtn.style.display = 'inline';
+            endCallBtn.style.display = 'none';
+        }
+
+        // Receive the list of connected users
+        socket.on('users', (userList) => {
+            users = userList;  // Update the users array with the connected users
+            console.log('Connected users:', users);
+
+            // Enable the "Start Call" button if there is at least one other user
+            if (users.length > 1) {
+                startCallBtn.disabled = false;  // Enable the button
+            } else {
+                startCallBtn.disabled = true;  // Disable the button if no other users
+            }
+        });
+    </script>
+</body>
+</html>
