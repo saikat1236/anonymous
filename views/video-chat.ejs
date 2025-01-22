@@ -533,7 +533,7 @@
           .addEventListener("click", () => {
             console.log("Disconnected from server");
             socket.emit("disconnect:manual");
-            window.location.href = "/";
+            window.location.href = "/video-chat";
           });
       
         document.getElementById("newChatButton").addEventListener("click", () => {
@@ -673,22 +673,24 @@
       
         // Handle SDP exchange
         socket.on("sdp:reply", async ({ sdp }) => {
-          if (!peer) return;
-      
-          try {
-            console.log("Received SDP:", sdp.type);
-            await peer.setRemoteDescription(new RTCSessionDescription(sdp));
-      
-            if (sdp.type === "offer") {
-              console.log("Creating answer as p2");
-              const answer = await peer.createAnswer();
-              await peer.setLocalDescription(answer);
-              socket.emit("sdp:send", { sdp: answer });
-            }
-          } catch (error) {
-            console.error("Error handling SDP:", error);
-          }
-        });
+  if (!peer) return;
+
+  try {
+    if (sdp.type === "offer" && peer.signalingState === "stable") {
+      console.log("Received offer, creating answer...");
+      await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await peer.createAnswer();
+      await peer.setLocalDescription(answer);
+      socket.emit("sdp:send", { sdp: answer });
+    } else if (sdp.type === "answer" && peer.signalingState === "have-remote-offer") {
+      console.log("Received answer, setting remote description...");
+      await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+    }
+  } catch (error) {
+    console.error("Error handling SDP:", error);
+  }
+});
+
       
         // Handle ICE candidates
         socket.on("ice:reply", async ({ candidate }) => {
@@ -710,7 +712,7 @@
         // Handle disconnection
         socket.on("disconnected", () => {
           console.log("Disconnected from server");
-          window.location.href = "/?disconnect";
+          window.location.href = "/video-chat";
         });
       
         // Send message function
