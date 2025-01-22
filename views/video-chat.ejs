@@ -86,13 +86,15 @@
     border-radius: 9999px;
     object-fit: cover;
     outline: 2px solid rgb(167, 139, 250);
+    transform: scaleX(-1); /* Mirrors the video horizontally */
 }
 
 @media (min-width: 1024px) {
     #myVideo {
-        bottom: 2rem;
+        top: 2rem;
         width: 10rem;
         height: 10rem;
+        transform: scaleX(-1); /* Mirrors the video horizontally */
     }
 }
 

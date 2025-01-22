@@ -6,7 +6,7 @@
                     <img src="/images/log2.jpg" alt="">
                 </figure>
                 <div class="friend-name">
-                    <ins><a href="time-line.html" title="">Anonymous<%=i%></a></ins>
+                    <ins>Anonymous<%=i%></ins>
                     <span>published: <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata",hour: '2-digit', minute:'2-digit' })%></span>
                     <!-- <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
                     <!-- <%= post[i].createdAt.toUTCString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
