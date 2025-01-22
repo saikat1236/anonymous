@@ -30,13 +30,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 12rem;
-        height: 12rem;
-        font-size: 0.875rem;
+        width: 15rem;
+        height: 3rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: white;
-        border-radius: 9999px;
+        border-radius: 8rem;
         animation: pulse 2s infinite;
+        background-color: #2196F3;
     }
     .chat-container {
 
@@ -58,7 +59,7 @@
     justify-content: center;
     position: relative;
     background-color: black;
-    height: 80%;
+    height: 85%;
     margin: 1rem;
     border-radius: 2rem;
     outline: 2px solid rgb(167, 139, 250);
@@ -187,24 +188,62 @@
             justify-content: center;
         }
 
-		.logo-container2 {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .logo-container2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #2196F3;
+    color: white;
+    border-radius: 8px; /* Smooth rounded corners */
+    width: 140px;
+    height: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+}
 
-            background-color: #2196F3;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
+.logo-container2 a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+    color: white; /* Ensure consistent text color */
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.logo-container2 i {
+    font-size: 24px;
+    margin-top: 5px;
+}
+
+.logo-container2:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    background-color: #1976D2; /* Darker shade for hover effect */
+}
+
+.logo-container2:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .logo-container2 {
+        width: 100px;
+        height: 60px;
+    }
+
+    .logo-container2 a {
+        font-size: 14px;
+    }
+
+    .logo-container2 i {
+        font-size: 20px;
+    }
+}
 
 
 
@@ -294,9 +333,11 @@
                 </span>
                 <span class="center-text">unknowns</span>
                 <span class="logo-container2">
+  
                     <a href="/video-chat"
                         style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
-                        <i class="material-icons">video_call</i>
+                        <p style="margin: 0;font-size: 1.2rem;" >New chat</p>
+                        <!-- <i class="material-icons">video_call</i> -->
                     </a>
                 </span>
             </div>
