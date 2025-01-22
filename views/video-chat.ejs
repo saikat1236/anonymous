@@ -428,13 +428,14 @@
     <script>
         const socket = io('https://omegle-clone-isz1.onrender.com');
 
-        socket.on('roomArr:size', (size) => {
+        socket.on('online:size', (size) => {
   console.log('Room Array Size:', size);
   // Update UI with the roomArr size
   document.getElementById('room-size').textContent = `${size} online`;
 });
     // Handle the disconnect button click
     document.getElementById('disconnectButton').addEventListener('click', () => {
+        console.log("disconnected");
   // Emit the custom manual disconnect event
   socket.emit('disconnect:manual');
 });
