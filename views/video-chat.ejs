@@ -1,381 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <title>unknowns</title>
-    <link rel="icon" href="/images/loogo.png" type="/images/jpg" sizes="16x16">
+    <link
+      rel="icon"
+      href="/images/loogo.png"
+      type="/images/jpg"
+      sizes="16x16"
+    />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="/css/main.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/color.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/color.css" />
+    <link rel="stylesheet" href="/css/responsive.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        /* Add this to your existing <style> section in video-chat.ejs */
-        .online-users-counter {
-            position: fixed;
-            top: 5rem;
-            right: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            border: 2px solid rgb(139, 92, 246);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+      /* Add this to your existing <style> section in video-chat.ejs */
+      .online-users-counter {
+        position: fixed;
+        top: 5rem;
+        right: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        border: 2px solid rgb(139, 92, 246);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      .online-indicator {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 9999px;
+        background-color: rgb(34, 197, 94);
+        animation: pulse 2s infinite;
+      }
+
+      .online-count {
+        color: white;
+        font-weight: 600;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
         }
 
-        .online-indicator {
-            width: 0.75rem;
-            height: 0.75rem;
-            border-radius: 9999px;
-            background-color: rgb(34, 197, 94);
-            animation: pulse 2s infinite;
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes countChange {
+        0% {
+          transform: scale(1);
         }
 
-        .online-count {
-            color: white;
-            font-weight: 600;
+        50% {
+          transform: scale(1.1);
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
+        100% {
+          transform: scale(1);
         }
+      }
 
-        @keyframes countChange {
-            0% {
-                transform: scale(1);
-            }
+      .count-animate {
+        animation: countChange 0.5s ease-out;
+      }
 
-            50% {
-                transform: scale(1.1);
-            }
+      .waiting-screen {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.01);
+      }
 
-            100% {
-                transform: scale(1);
-            }
-        }
+      .waiting-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 15rem;
+        height: 3rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: white;
+        border-radius: 8rem;
+        animation: pulse 2s infinite;
+        background-color: #2196f3;
+      }
 
+      .chat-container {
+        display: grid;
+        grid-template-rows: 3fr 1fr;
+        /* Video section takes 3 parts; chat takes 1 part */
+        height: 100vh;
+        overflow: hidden;
+      }
 
-
-        .count-animate {
-            animation: countChange 0.5s ease-out;
-        }
-
-        .waiting-screen {
-            position: absolute;
-            inset: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.01);
-        }
-
-        .waiting-text {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 15rem;
-            height: 3rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: white;
-            border-radius: 8rem;
-            animation: pulse 2s infinite;
-            background-color: #2196F3;
-        }
-
+      @media (min-width: 1024px) {
         .chat-container {
-
-            display: grid;
-            grid-template-rows: 3fr 1fr;
-            /* Video section takes 3 parts; chat takes 1 part */
-            height: 100vh;
-            overflow: hidden;
+          grid-template-columns: 3fr 1fr;
+          /* Video section takes 3 parts; chat takes 1 part */
         }
+      }
 
-        @media (min-width: 1024px) {
-            .chat-container {
-                grid-template-columns: 3fr 1fr;
-                /* Video section takes 3 parts; chat takes 1 part */
-            }
-        }
+      .video-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background-color: black;
+        height: 85%;
+        margin: 1rem;
+        border-radius: 2rem;
+        outline: 2px solid rgb(167, 139, 250);
+      }
 
-        .video-section {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background-color: black;
-            height: 85%;
-            margin: 1rem;
-            border-radius: 2rem;
-            outline: 2px solid rgb(167, 139, 250);
-        }
+      #strangerVideo {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        /* Prevent video from exceeding the container height */
+        max-width: 100%;
+        /* Prevent video from exceeding the container width */
+        border-radius: 2rem;
+        object-fit: cover;
+        outline: 2px solid rgb(167, 139, 250);
+      }
 
+      #myVideo {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        width: 8rem;
+        height: 8rem;
+        background-color: rgb(243, 232, 255);
+        border-radius: 9999px;
+        object-fit: cover;
+        outline: 2px solid rgb(167, 139, 250);
+        transform: scaleX(-1);
+        /* Mirrors the video horizontally */
+      }
 
-        #strangerVideo {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            max-height: 100%;
-            /* Prevent video from exceeding the container height */
-            max-width: 100%;
-            /* Prevent video from exceeding the container width */
-            border-radius: 2rem;
-            object-fit: cover;
-            outline: 2px solid rgb(167, 139, 250);
-        }
-
-
+      @media (min-width: 1024px) {
         #myVideo {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
-            width: 8rem;
-            height: 8rem;
-            background-color: rgb(243, 232, 255);
-            border-radius: 9999px;
-            object-fit: cover;
-            outline: 2px solid rgb(167, 139, 250);
-            transform: scaleX(-1);
-            /* Mirrors the video horizontally */
+          top: 2rem;
+          width: 10rem;
+          height: 10rem;
+          transform: scaleX(-1);
+          /* Mirrors the video horizontally */
         }
+      }
 
-        @media (min-width: 1024px) {
-            #myVideo {
-                top: 2rem;
-                width: 10rem;
-                height: 10rem;
-                transform: scaleX(-1);
-                /* Mirrors the video horizontally */
-            }
-        }
+      .chat-section {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        overflow-y: visible;
+        padding: 1rem;
+        /* background-color: white; */
+        /* border-top: 2px solid rgb(191, 219, 254); */
+      }
 
+      @media (min-width: 1024px) {
         .chat-section {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow-y: visible;
-            padding: 1rem;
-            /* background-color: white; */
-            /* border-top: 2px solid rgb(191, 219, 254); */
+          border-top: none;
+          /* border-left: 2px solid rgb(191, 219, 254); */
+          height: 45rem;
         }
+      }
 
+      .messages-container {
+        margin-bottom: 5rem;
+        max-height: calc(100% - 6rem);
+        overflow-y: auto;
+      }
 
-        @media (min-width: 1024px) {
-            .chat-section {
-                border-top: none;
-                /* border-left: 2px solid rgb(191, 219, 254); */
-                height: 45rem;
-            }
-        }
+      .input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        /* background-color: white; */
+        width: 100%;
+        /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
+      }
 
-        .messages-container {
-            margin-bottom: 5rem;
-            max-height: calc(100% - 6rem);
-            overflow-y: auto;
-        }
-
+      @media (min-width: 1024px) {
         .input-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            /* background-color: white; */
-            width: 100%;
-            /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
+          width: 25%;
+          left: auto;
+          right: 0;
         }
+      }
 
-        @media (min-width: 1024px) {
-            .input-container {
-                width: 25%;
-                left: auto;
-                right: 0;
-            }
-        }
+      .message-input {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border: 2px solid rgb(167, 139, 250);
+        border-radius: 1rem;
+      }
 
-        .message-input {
-            flex: 1;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            border: 2px solid rgb(167, 139, 250);
-            border-radius: 1rem;
-        }
+      .message-input:focus {
+        outline: none;
+      }
 
-        .message-input:focus {
-            outline: none;
-        }
+      .send-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: white;
+        background-color: rgb(124, 58, 237);
+        border: 2px solid rgb(167, 139, 250);
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
 
-        .send-button {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            color: white;
-            background-color: rgb(124, 58, 237);
-            border: 2px solid rgb(167, 139, 250);
-            border-radius: 0.5rem;
-            cursor: pointer;
-        }
+      /* Floating Button Container */
 
+      .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        /* Ensure it spans the full width */
+        padding: 0 20px;
+        height: 100px;
+        /* Set a consistent height for the header */
+      }
 
-        /* Floating Button Container */
+      .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
 
+      .logo-container2 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #2196f3;
+        /* color: white; */
+        border-radius: 8px;
+        /* Smooth rounded corners */
+        width: 100px;
+        height: 50px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+      }
 
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            /* Ensure it spans the full width */
-            padding: 0 20px;
-            height: 100px;
-            /* Set a consistent height for the header */
-        }
+      .logo-container2 a {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+        /* Ensure consistent text color */
+        font-size: 16px;
+        font-weight: bold;
+      }
 
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+      .logo-container2 i {
+        font-size: 24px;
+        /* margin-top: 5px; */
+      }
 
+      .logo-container2:hover {
+        transform: scale(1.05);
+        /* Slightly enlarge on hover */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        background-color: #1976d2;
+        /* Darker shade for hover effect */
+      }
+
+      .logo-container2:active {
+        transform: scale(0.95);
+        /* Slightly shrink on click */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      @media (max-width: 768px) {
         .logo-container2 {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #2196F3;
-            color: white;
-            border-radius: 8px;
-            /* Smooth rounded corners */
-            width: 140px;
-            height: 50px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            text-align: center;
+          width: 50px;
+          height: 50px;
         }
 
         .logo-container2 a {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            text-decoration: none;
-            color: white;
-            /* Ensure consistent text color */
-            font-size: 16px;
-            font-weight: bold;
+          font-size: 14px;
         }
 
         .logo-container2 i {
-            font-size: 24px;
-            margin-top: 5px;
+          font-size: 20px;
+        }
+      }
+
+      .center-text {
+        flex: 1;
+        text-align: center;
+        font-size: 6vw;
+        /* Larger text for header */
+        font-weight: semi-bold;
+        /* Make the text bold */
+        /* text-transform: uppercase; Make the text uppercase */
+        font-family: "Courier New", monospace;
+        color: transparent;
+        /* Make the text color transparent for the effect */
+        position: relative;
+        /* For positioning the light effect */
+        /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 50%,
+          #fff 50%
+        );
+        background-size: 200% 100%;
+        /* Make the gradient double the text size */
+        background-position: -100% 0;
+        /* Start the gradient from the left */
+
+        -webkit-background-clip: text;
+        /* Webkit for compatibility */
+        background-clip: text;
+        /* Clip the background to the text */
+        animation: lightEffect 7s ease-in-out infinite;
+        /* Animation for the light effect */
+      }
+
+      /* Keyframe animation for the light effect */
+      @keyframes lightEffect {
+        0% {
+          background-position: -100% 0;
+          /* Light starts from the left */
         }
 
-        .logo-container2:hover {
-            transform: scale(1.05);
-            /* Slightly enlarge on hover */
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-            background-color: #1976D2;
-            /* Darker shade for hover effect */
+        50% {
+          background-position: 100% 0;
+          /* Light moves to the right */
         }
 
-        .logo-container2:active {
-            transform: scale(0.95);
-            /* Slightly shrink on click */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        100% {
+          background-position: -100% 0;
+          /* Light returns to the left */
         }
-
-        @media (max-width: 768px) {
-            .logo-container2 {
-                width: 100px;
-                height: 50px;
-            }
-
-            .logo-container2 a {
-                font-size: 14px;
-            }
-
-            .logo-container2 i {
-                font-size: 20px;
-            }
-        }
-
-
-
-        .center-text {
-            flex: 1;
-            text-align: center;
-            font-size: 6vw;
-            /* Larger text for header */
-            font-weight: semi-bold;
-            /* Make the text bold */
-            /* text-transform: uppercase; Make the text uppercase */
-            font-family: 'Courier New', monospace;
-            color: transparent;
-            /* Make the text color transparent for the effect */
-            position: relative;
-            /* For positioning the light effect */
-            /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 50%, #fff 50%);
-            background-size: 200% 100%;
-            /* Make the gradient double the text size */
-            background-position: -100% 0;
-            /* Start the gradient from the left */
-
-            -webkit-background-clip: text;
-            /* Webkit for compatibility */
-            background-clip: text;
-            /* Clip the background to the text */
-            animation: lightEffect 7s ease-in-out infinite;
-            /* Animation for the light effect */
-        }
-
-        /* Keyframe animation for the light effect */
-        @keyframes lightEffect {
-            0% {
-                background-position: -100% 0;
-                /* Light starts from the left */
-            }
-
-            50% {
-                background-position: 100% 0;
-                /* Light moves to the right */
-            }
-
-            100% {
-                background-position: -100% 0;
-                /* Light returns to the left */
-            }
-        }
+      }
     </style>
+  </head>
 
-</head>
-
-<body>
+  <body>
     <div class="theme-layout">
-        <div class="postoverlay"></div>
-        <!-- <div class="responsive-header">
+      <div class="postoverlay"></div>
+      <!-- <div class="responsive-header">
             <div class="mh-head first Sticky">
                 <div class="header-container">
                     <span class="logo-container">
@@ -408,22 +411,47 @@
                 </a>
             </div>
         </div> -->
-        <div class="first Sticky" style="background-color: black;">
-            <div class="header-container">
-                <span class="logo-container">
-                    <a href="/">
-                        <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
-                    </a>
-                    <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
-                            style="color: aqua;"> Saikat</a></p>
-                </span>
-                <span class="center-text">unknowns</span>
+      <div class="first Sticky" style="background-color: black">
+        <div class="header-container">
+          <span class="logo-container">
+            <a href="/">
+              <img
+                src="/images/log-modified.jpg"
+                alt=""
+                style="height: 60px; min-width: 60px"
+              />
+            </a>
+            <p style="font-size: 10px">
+              developed by<a
+                href="https://saikat-biswas.vercel.app/"
+                style="color: aqua"
+              >
+                Saikat</a
+              >
+            </p>
+          </span>
+          <span class="center-text">unknowns</span>
 
+          <!-- Video End (Splash) Button -->
+          <button
+            id="disconnectButton"
+            class="logo-container2"
+            style="background-color: red; margin-right: 10px"
+          >
+            <i class="fas fa-video-slash"></i>
+            <!-- Video end icon -->
+          </button>
 
-                <button id="disconnectButton" class="logo-container2" style="background-color: red;">Disconnect</button>
-                <button id="newChatButton" class="logo-container2" style="background-color: rgb(56, 56, 237);">New
-                    chat</button>
-                <!-- <span class="logo-container2" id="newChatButton">
+          <button
+            id="newChatButton"
+            class="logo-container2"
+            style="background-color: rgb(56, 56, 237)"
+          >
+            <i class="fas fa-video"></i>
+            <!-- New video call icon -->
+          </button>
+
+          <!-- <span class="logo-container2" id="newChatButton">
 
   
                     <a href="/video-chat"
@@ -432,289 +460,307 @@
  
                     </a>
                 </span> -->
-                <div class="online-users-counter">
-                    <div class="online-indicator"></div>
-                    <span class="online-count" id="room-size">0 online</span>
-                </div>
-            </div>
+          <div class="online-users-counter">
+            <div class="online-indicator"></div>
+            <span class="online-count" id="room-size">0 online</span>
+          </div>
         </div>
+      </div>
 
-        <!-- <div id="waitingScreen" class="waiting-screen">
+      <!-- <div id="waitingScreen" class="waiting-screen">
         <span class="waiting-text">Waiting For Someone...</span>
     </div> -->
 
-        <div class="chat-container" style="background-color: #111111;
-    background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;">
-            <div class="video-section">
-                <div id="waitingScreen" class="waiting-screen">
-                    <span class="waiting-text">Waiting For Someone...</span>
-                </div>
-                <video id="strangerVideo" autoplay playsinline></video>
-                <video id="myVideo" autoplay playsinline muted></video>
-            </div>
-
-            <div class="chat-section">
-                <div id="messagesContainer" class="messages-container"></div>
-
-                <div class="input-container">
-                    <input type="text" id="messageInput" style="color: #111111;" class="message-input"
-                        placeholder="Type your message here...">
-                    <button id="sendButton" class="send-button">Send</button>
-                </div>
-            </div>
+      <div
+        class="chat-container"
+        style="
+          background-color: #111111;
+          background-image: linear-gradient(
+              to right,
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              to bottom,
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            );
+          background-size: 20px 20px;
+        "
+      >
+        <div class="video-section">
+          <div id="waitingScreen" class="waiting-screen">
+            <span class="waiting-text">Waiting For Someone...</span>
+          </div>
+          <video id="strangerVideo" autoplay playsinline></video>
+          <video id="myVideo" autoplay playsinline muted></video>
         </div>
+
+        <div class="chat-section">
+          <div id="messagesContainer" class="messages-container"></div>
+
+          <div class="input-container">
+            <input
+              type="text"
+              id="messageInput"
+              style="color: #111111"
+              class="message-input"
+              placeholder="Type your message here..."
+            />
+            <button id="sendButton" class="send-button">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const socket = io('https://omegle-clone-isz1.onrender.com');
-
-        socket.on('online:size', (size) => {
-            console.log('online no:', size);
-            // Update UI with the roomArr size
-            document.getElementById('room-size').textContent = `${size} online`;
+        const socket = io("https://omegle-clone-isz1.onrender.com");
+      
+        socket.on("online:size", (size) => {
+          console.log("online no:", size);
+          // Update UI with the roomArr size
+          document.getElementById("room-size").textContent = `${size} online`;
         });
-        socket.on('roomArr:size', (size) => {
-            console.log('Room array size:', size);
-            // Update UI with the roomArr size
+      
+        socket.on("roomArr:size", (size) => {
+          console.log("Room array size:", size);
+          // Update UI with the roomArr size
         });
+      
         // Handle the disconnect button click
-        document.getElementById('disconnectButton').addEventListener('click', () => {
-            console.log('Disconnected from server');
-            socket.emit('disconnect:manual');
-            window.location.href = '/';
+        document
+          .getElementById("disconnectButton")
+          .addEventListener("click", () => {
+            console.log("Disconnected from server");
+            socket.emit("disconnect:manual");
+            window.location.href = "/";
+          });
+      
+        document.getElementById("newChatButton").addEventListener("click", () => {
+          // Notify the server to disconnect the user
+          if (socket && socket.connected) {
+            console.log("Disconnected from server");
+            socket.emit("disconnect:manual");
+            window.location.href = "/video-chat";
+          }
+      
+          // Reset chat UI or clear state for a new session
+          console.log("Chat reset for a new session.");
         });
-
-        document.getElementById('newChatButton').addEventListener('click', () => {
-
-            // Notify the server to disconnect the user
-            if (socket && socket.connected) {
-                // socket.emit('disconnect');
-                // socket.disconnect(); // Closes the connection locally
-                console.log('Disconnected from server');
-                socket.emit('disconnect:manual');
-                window.location.href = '/video-chat';
-            }
-
-            // Clear the chat UI or reset for a new session
-            // document.querySelector('.messages-container').innerHTML = ''; // Clear messages
-            // document.querySelector('#strangerVideo').srcObject = null; // Stop stranger's video
-            // document.querySelector('#myVideo').srcObject = null; // Stop user's video
-
-            // Optionally, redirect or reset the page
-            console.log('Chat reset for a new session.');
-        });
-
-        let peer = null;
+      
+        let peer;
         let type = null;
         let roomId = null;
-        let localStream = null;
-
+        let localStream;
+        let tracksAdded = false;  // Flag to ensure tracks are added once
+      
         const configuration = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-            ],
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" },
+            { urls: "stun:stun3.l.google.com:19302" },
+            { urls: "stun:stun4.l.google.com:19302" },
+          ],
         };
-
-        // const peerConnection = new RTCPeerConnection(configuration);
-        // Monitor ICE connection state changes
-        // peerConnection.oniceconnectionstatechange = () => {
-        //   console.log('ICE Connection State:', peerConnection.iceConnectionState);
-        // };
-
-        // // Monitor overall connection state changes
-        // peerConnection.onconnectionstatechange = () => {
-        //   console.log('Connection State:', peerConnection.connectionState);
-
-        //   switch (peerConnection.connectionState) {
-        //     case 'connected':
-        //       console.log('Peers are connected!');
-        //       break;
-        //     case 'disconnected':
-        //       console.log('Peer disconnected.');
-        //       break;
-        //     case 'failed':
-        //       console.error('Connection failed.');
-        //       break;
-        //     case 'closed':
-        //       console.log('Connection closed.');
-        //       break;
-        //   }
-        // };
-
-        // DOM elements
-        const myVideo = document.getElementById('myVideo');
-        const strangerVideo = document.getElementById('strangerVideo');
-        const waitingScreen = document.getElementById('waitingScreen');
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-
-        // Initialize local stream
-        async function initLocalStream() {
+      
+        const myVideo = document.getElementById("myVideo");
+        const strangerVideo = document.getElementById("strangerVideo");
+        const waitingScreen = document.getElementById("waitingScreen");
+        const messagesContainer = document.getElementById("messagesContainer");
+        const messageInput = document.getElementById("messageInput");
+        const sendButton = document.getElementById("sendButton");
+      
+        async function initializeLocalStream() {
+          // Check if the browser supports media devices
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: true
+              // Request the local media stream (audio and video)
+              localStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true,
+              });
+              console.log("Local stream obtained:", localStream);
+      
+              // Set the local stream to the myVideo element
+              myVideo.srcObject = localStream;
+      
+              // Initialize the peer connection after obtaining the local stream
+              peer = new RTCPeerConnection(configuration);
+      
+              // Add tracks to the peer connection only once
+              if (!tracksAdded) {
+                localStream.getTracks().forEach((track) => {
+                  console.log("Adding track:", track);
+                  peer.addTrack(track, localStream);
                 });
-                localStream = stream;
-                myVideo.srcObject = stream;
+                tracksAdded = true; // Set the flag after adding tracks
+              }
             } catch (err) {
-                console.error('Error accessing media devices:', err);
+              console.error("Error accessing media devices:", err);
             }
+          } else {
+            console.error("Media devices not supported in this browser.");
+          }
         }
-
+      
+        // Call this function to initialize the local stream
+        initializeLocalStream();
+      
         // Initialize socket connection
-        socket.emit('start', (person) => {
-            console.log('Started as:', person);
-            type = person;
+        socket.emit("start", (person) => {
+          console.log("Started as:", person);
+          type = person;
         });
-
+      
         // Handle remote connection
-        socket.on('remote-socket', async (id) => {
-            remoteSocket = id;
-            console.log('Connected to remote socket:', id);
-            waitingScreen.style.display = 'none';
-
+        socket.on("remote-socket", async (id) => {
+          remoteSocket = id;
+          console.log("Connected to remote socket:", id);
+          waitingScreen.style.display = "none";
+      
+          // Only create a new peer if not already initialized
+          if (!peer) {
             peer = new RTCPeerConnection(configuration);
-
-            // Add local stream tracks to peer connection
-            localStream.getTracks().forEach(track => {
-                peer.addTrack(track, localStream);
+          }
+      
+          // Ensure tracks are only added once
+          if (!tracksAdded && localStream) {
+            localStream.getTracks().forEach((track) => {
+              peer.addTrack(track, localStream);
             });
-
-            // Handle incoming tracks
-            peer.ontrack = (e) => {
-                console.log('Received remote track:', e.streams[0]);
-                console.log('Stranger Video',strangerVideo);
-                if (strangerVideo && e.streams[0]) {
-                    console.log('strangerVideo is here');
-                    strangerVideo.srcObject = e.streams[0];
-                }
-            };
-
-            // Handle ICE candidates
-            peer.onicecandidate = (e) => {
-                if (e.candidate) {
-                    console.log('Generated ICE candidate:', e.candidate);
-                    socket.emit('ice:send', { candidate: e.candidate, to: remoteSocket });
-                }
-            };
-
-            // If we're p1, create and send the offer
-            if (type === 'p1') {
-                try {
-                    const offer = await peer.createOffer();
-                    await peer.setLocalDescription(offer);
-                    socket.emit('sdp:send', { sdp: offer });
-                } catch (err) {
-                    console.error('Error creating offer:', err);
-                }
+            tracksAdded = true;
+          }
+      
+          // Handle incoming tracks
+          peer.ontrack = (event) => {
+            if (event.streams && event.streams[0]) {
+              strangerVideo.srcObject = event.streams[0];
+              console.log("Received remote stream:", event.streams[0]);
+            } else {
+              console.error("No remote stream found in event:", event);
             }
+          };
+      
+          // Handle ICE candidates
+          peer.onicecandidate = (e) => {
+            if (e.candidate) {
+              console.log("Generated ICE candidate:", e.candidate);
+              socket.emit("ice:send", {
+                candidate: e.candidate,
+                to: remoteSocket,
+              });
+            }
+          };
+      
+          // If we're p1, create and send the offer
+          if (type === "p1") {
+            try {
+              const offer = await peer.createOffer();
+              await peer.setLocalDescription(offer);
+              socket.emit("sdp:send", { sdp: offer });
+            } catch (err) {
+              console.error("Error creating offer:", err);
+            }
+          }
         });
-
+      
         // Handle room ID
-        socket.on('roomid', (id) => {
-            console.log('Joined room:', id);
-            roomId = id;
+        socket.on("roomid", (id) => {
+          console.log("Joined room:", id);
+          roomId = id;
         });
-
+      
         // Handle SDP exchange
-        socket.on('sdp:reply', async ({ sdp }) => {
-            if (!peer) return;
-
-            try {
-                console.log('Received SDP:', sdp.type);
-                await peer.setRemoteDescription(new RTCSessionDescription(sdp));
-
-                if (sdp.type === 'offer') {
-                    console.log('Creating answer as p2');
-                    const answer = await peer.createAnswer();
-                    await peer.setLocalDescription(answer);
-                    socket.emit('sdp:send', { sdp: answer });
-                }
-            } catch (error) {
-                console.error('Error handling SDP:', error);
+        socket.on("sdp:reply", async ({ sdp }) => {
+          if (!peer) return;
+      
+          try {
+            console.log("Received SDP:", sdp.type);
+            await peer.setRemoteDescription(new RTCSessionDescription(sdp));
+      
+            if (sdp.type === "offer") {
+              console.log("Creating answer as p2");
+              const answer = await peer.createAnswer();
+              await peer.setLocalDescription(answer);
+              socket.emit("sdp:send", { sdp: answer });
             }
+          } catch (error) {
+            console.error("Error handling SDP:", error);
+          }
         });
-
+      
         // Handle ICE candidates
-        socket.on('ice:reply', async ({ candidate }) => {
-            if (!peer || !candidate) return;
-
+        socket.on("ice:reply", async ({ candidate }) => {
+          if (candidate) {
             try {
-                console.log('Received ICE candidate');
-                await peer.addIceCandidate(new RTCIceCandidate(candidate));
-            } catch (error) {
-                console.error('Error adding ICE candidate:', error);
+              await peer.addIceCandidate(new RTCIceCandidate(candidate));
+              console.log("ICE candidate added successfully.");
+            } catch (err) {
+              console.error("Error adding ICE candidate:", err);
             }
+          }
         });
-
+      
         // Handle incoming messages
-        socket.on('get-message', (input) => {
-            addMessage(input, 'Stranger');
+        socket.on("get-message", (input) => {
+          addMessage(input, "Stranger");
         });
-
+      
         // Handle disconnection
-        socket.on('disconnected', () => {
-            console.log('Disconnected from server');
-            window.location.href = '/?disconnect';
+        socket.on("disconnected", () => {
+          console.log("Disconnected from server");
+          window.location.href = "/?disconnect";
         });
-
+      
         // Send message function
         function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
-
-            socket.emit('send-message', message, type, roomId);
-            addMessage(message, 'You');
-            messageInput.value = '';
+          const message = messageInput.value.trim();
+          if (!message) return;
+      
+          socket.emit("send-message", message, type, roomId);
+          addMessage(message, "You");
+          messageInput.value = "";
         }
-
+      
         // Add message to chat
         function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message';
-            messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          const messageDiv = document.createElement("div");
+          messageDiv.className = "message";
+          messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+          messagesContainer.appendChild(messageDiv);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-
+      
         // Event listeners
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        sendButton.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") sendMessage();
         });
-
-        // Initialize
-        initLocalStream();
-        // Add this near your other socket listeners
-        socket.on('userCount', (count) => {
-            updateUserCount(count);
+      
+        // Handle user count
+        socket.on("userCount", (count) => {
+          updateUserCount(count);
         });
-
+      
         function updateUserCount(count) {
-            const countElement = document.querySelector('.online-count');
-            if (!countElement) return;
-
-            // Update text
-            countElement.textContent = `${count} ${count === 1 ? 'user' : 'users'} online`;
-
-            // Add animation
-            countElement.classList.add('count-animate');
-
-            // Remove animation class after it completes
-            setTimeout(() => {
-                countElement.classList.remove('count-animate');
-            }, 500);
+          const countElement = document.querySelector(".online-count");
+          if (!countElement) return;
+      
+          // Update text
+          countElement.textContent = `${count} ${
+            count === 1 ? "user" : "users"
+          } online`;
+      
+          // Add animation
+          countElement.classList.add("count-animate");
+      
+          // Remove animation class after it completes
+          setTimeout(() => {
+            countElement.classList.remove("count-animate");
+          }, 500);
         }
-    </script>
-</body>
-
+      </script>
+      
+  </body>
 </html>

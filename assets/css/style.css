@@ -8734,7 +8734,7 @@ a.shopping-cart > i {
 
 .delivery-guide > a::before {
     color: #e3e3e3;
-    content: "x";
+    /* content: "x"; */
     font-size: 12px;
     position: absolute;
     right: -19px;
