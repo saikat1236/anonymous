@@ -8,77 +8,84 @@
                 <div class="friend-name">
                     <ins>Anonymous<%=i%></ins>
                     <span>published: <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata",hour: '2-digit', minute:'2-digit' })%></span>
-                    <!-- <%=post[i].createdAt.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) %> <%= post[i].createdAt.toLocaleTimeString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
-                    <!-- <%= post[i].createdAt.toUTCString('en-US',{ timeZone: "Asia/Kolkata" })%> -->
                 </div>
                 <div class="description">
-                        
-                        <p>
-                           <%=post[i].post%>
-                        
-                        </p>
+                    <p>
+                        <%=post[i].post%>
+                    </p>
                 </div>
-                <!-- <div class="post-meta">	 -->
-                    <div class="we-video-info">
-                        <ul>
-                            <li>
-                                <span class="comment" data-toggle="tooltip" title="Comments">
-                                    <i class="fa fa-comments-o" style="font-size:16px"></i>
-                                    <ins><%=post[i].comments.length%></ins>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="like" data-toggle="tooltip" title="likes">
-                                    <i class="fa fa-thumbs-up" style="font-size:16px"></i>
-                                    <ins>0</ins>
-                                </span>
-                            </li>
-                        </ul>
-
-                    </div>
-                    
-                <!-- </div> -->
+                <div class="we-video-info">
+                    <ul>
+                        <li>
+                            <span class="comment" data-toggle="tooltip" title="Comments">
+                                <i class="fa fa-comments-o" style="font-size:16px"></i>
+                                <ins><%=post[i].comments.length%></ins>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="like" data-toggle="tooltip" title="likes">
+                                <i class="fa fa-thumbs-up" style="font-size:16px"></i>
+                                <ins>0</ins>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <hr class="border  ">
-           
+            <hr class="border">
             <div class="coment-area">
                 <ul class="we-comet">
-                    
-                        <% for(var j = 0 ; j < post[i].comments.length ; j++) { %>
-                            <li>
-                                <div class="comet-avatar">
-                                    <img src="/images/log2.jpg" alt="">
-                                </div>
-                                <div class="we-comment">
-                                    <div class="coment-head">
-                                        <h5><a href="time-line.html" title=""></a>Anonymous<%=i%>.comment<%=j%></h5>
-                                        <span><%=Math.floor((new Date().getTime()- post[i].comments[j].createdAt.getTime())/(1000*3600*24))%> days ago</span>
-                                        <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-                                    </div>
-                                    <p style="width:100%; word-break:break-all;"><%=post[i].comments[j].comment%>
-                                        <!-- <i class="em em-smiley"></i> -->
-                                    </p>
-                                </div>
-                            </li>
-                            <% } %>
-                          
-                    
+                    <% for(var j = 0 ; j < post[i].comments.length ; j++) { %>
+                    <li>
+                        <div class="comet-avatar">
+                            <img src="/images/log2.jpg" alt="">
+                        </div>
+                        <div class="we-comment">
+                            <div class="coment-head">
+                                <h5><a href="time-line.html" title=""></a>Anonymous<%=i%>.comment<%=j%></h5>
+                                <span><%=Math.floor((new Date().getTime()- post[i].comments[j].createdAt.getTime())/(1000*3600*24))%> days ago</span>
+                                <a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+                            </div>
+                            <p style="width:100%; word-break:break-all;">
+                                <%=post[i].comments[j].comment%>
+                            </p>
+                        </div>
+                    </li>
+                    <% } %>
                     <li class="post-comment">
                         <div class="comet-avatar">
                             <img src="/images/log2.jpg" alt="">
                         </div>
                         <div class="post-comt-box">
-                            <form action='/<%=post[i]._id%>/comment' method="POST" >
-                                <textarea type="text" name="comment" rows="1" placeholder="Post your comment"></textarea>
-                            
-                                           <button type="submit" class="btn btn-outline-dark">Post</button>
+                            <form action='/<%=post[i]._id%>/comment' method="POST" class="comment-form">
+                                <textarea
+                                    type="text"
+                                    name="comment"
+                                    rows="1"
+                                    placeholder="Post your comment"
+                                    class="comment-textarea"
+                                ></textarea>
+                                <button type="submit" class="btn btn-outline-dark">Post</button>
                             </form>
                         </div>
                     </li>
                 </ul>
-            </div> 
+            </div>
         </div>
-        
     </div>
-   
     <% } %>
+    
+    <script>
+        // Select all comment forms
+        document.querySelectorAll('.comment-form').forEach((form) => {
+            const textarea = form.querySelector('.comment-textarea');
+    
+            // Add a keydown listener to the textarea
+            textarea.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // Prevent newline
+                    form.submit(); // Submit the form
+                }
+            });
+        });
+    </script>
+    

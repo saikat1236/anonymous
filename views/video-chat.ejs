@@ -381,15 +381,16 @@
 
 
                 <button id="disconnectButton" class="logo-container2" style="background-color: red;">Disconnect</button>
-                <span class="logo-container2">
+                <button id="newChatButton" class="logo-container2" style="background-color: rgb(56, 56, 237);">New chat</button>
+                <!-- <span class="logo-container2" id="newChatButton">
 
   
                     <a href="/video-chat"
                         style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
                         <p style="margin: 0;font-size: 1.2rem;" >New chat</p>
-                        <!-- <i class="material-icons">video_call</i> -->
+ 
                     </a>
-                </span>
+                </span> -->
                 <div class="online-users-counter">
                     <div class="online-indicator"></div>
                     <span class="online-count" id="room-size">0 online</span>
@@ -429,16 +430,41 @@
         const socket = io('https://omegle-clone-isz1.onrender.com');
 
         socket.on('online:size', (size) => {
-  console.log('Room Array Size:', size);
+  console.log('online no:', size);
   // Update UI with the roomArr size
   document.getElementById('room-size').textContent = `${size} online`;
 });
+socket.on('roomArr:size', (size) => {
+  console.log('Room array size:', size);
+  // Update UI with the roomArr size
+});
     // Handle the disconnect button click
     document.getElementById('disconnectButton').addEventListener('click', () => {
-        console.log("disconnected");
-  // Emit the custom manual disconnect event
-  socket.emit('disconnect:manual');
+        console.log('Disconnected from server');
+        socket.emit('disconnect:manual');
+        window.location.href = '/';
 });
+
+document.getElementById('newChatButton').addEventListener('click', () => {
+
+    // Notify the server to disconnect the user
+    if (socket && socket.connected) {
+        // socket.emit('disconnect');
+        // socket.disconnect(); // Closes the connection locally
+        console.log('Disconnected from server');
+        socket.emit('disconnect:manual');
+        window.location.href = '/';
+    }
+    
+    // Clear the chat UI or reset for a new session
+    // document.querySelector('.messages-container').innerHTML = ''; // Clear messages
+    // document.querySelector('#strangerVideo').srcObject = null; // Stop stranger's video
+    // document.querySelector('#myVideo').srcObject = null; // Stop user's video
+    
+    // Optionally, redirect or reset the page
+    console.log('Chat reset for a new session.');
+});
+
         let peer = null;
         let type = null;
         let roomId = null;

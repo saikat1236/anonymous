@@ -1,11 +1,32 @@
 <form action="/" method="POST" id="form">
-    <textarea type="text" name="post" rows="2" placeholder="write something ..."></textarea>
-    <!-- <input type="text" name="post" value="" placeholder="write something" required> -->
+    <textarea
+      type="text"
+      name="post"
+      rows="2"
+      placeholder="write something ..."
+      id="textarea"
+    ></textarea>
     <div class="attachments">
-        <ul>
-            <li>
-               <button type="submit">Publish</button>
-            </li>
-        </ul>
+      <ul>
+        <li>
+          <button type="submit">Publish</button>
+        </li>
+      </ul>
     </div>
-</form>
+  </form>
+  
+  <script>
+    // Get the textarea and form elements
+    const textarea = document.getElementById('textarea');
+    const form = document.getElementById('form');
+  
+    // Add a keydown event listener to the textarea
+    textarea.addEventListener('keydown', (event) => {
+      // Check if the Enter key is pressed
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Prevent adding a newline in the textarea
+        form.submit(); // Submit the form
+      }
+    });
+  </script>
+  
