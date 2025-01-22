@@ -19,7 +19,7 @@
     /* Add this to your existing <style> section in video-chat.ejs */
 .online-users-counter {
     position: fixed;
-    top: 1rem;
+    top: 5rem;
     right: 1rem;
     display: flex;
     align-items: center;
@@ -279,7 +279,7 @@
 @media (max-width: 768px) {
     .logo-container2 {
         width: 100px;
-        height: 60px;
+        height: 50px;
     }
 
     .logo-container2 a {
@@ -388,7 +388,7 @@
                 </span>
                 <div class="online-users-counter">
                     <div class="online-indicator"></div>
-                    <span class="online-count">0 users online</span>
+                    <span class="online-count" id="room-size">0 online</span>
                 </div>
             </div>
         </div>
@@ -423,6 +423,13 @@
 
     <script>
         const socket = io('https://omegle-clone-isz1.onrender.com');
+
+        socket.on('roomArr:size', (size) => {
+  console.log('Room Array Size:', size);
+  // Update UI with the roomArr size
+  document.getElementById('room-size').textContent = `${size} online`;
+});
+
         let peer = null;
         let type = null;
         let roomId = null;
