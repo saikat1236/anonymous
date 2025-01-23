@@ -42,31 +42,43 @@ let connectedUsers = 0;
 //     });
 // });
 
-// Socket.IO signaling
 let users = [];
 
+
 io.on('connection', (socket) => {
-  console.log('A user connected');
-  users.push(socket.id);
+    console.log(`User connected: ${socket.id}`);
+    
+    // Add user to the list
+    users.push(socket.id);
+    
+    // Emit the list of connected users to all clients
+    io.emit('users', users);
+    
+    // Handle disconnect
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+        
+        // Remove user from the list
+        users = users.filter(user => user !== socket.id);
+        
+        // Emit updated list of users to all clients
+        io.emit('users', users);
+    });
 
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-    users = users.filter(user => user !== socket.id);
-  });
+    // Handle incoming offer, answer, and candidate messages
+    socket.on('offer', (offer, toSocketId) => {
+        io.to(toSocketId).emit('offer', offer, socket.id);
+    });
 
-  // Handle signaling messages
-  socket.on('offer', (offer, toSocketId) => {
-    io.to(toSocketId).emit('offer', offer, socket.id);
-  });
+    socket.on('answer', (answer, toSocketId) => {
+        io.to(toSocketId).emit('answer', answer);
+    });
 
-  socket.on('answer', (answer, toSocketId) => {
-    io.to(toSocketId).emit('answer', answer);
-  });
-
-  socket.on('candidate', (candidate, toSocketId) => {
-    io.to(toSocketId).emit('candidate', candidate);
-  });
+    socket.on('candidate', (candidate, toSocketId) => {
+        io.to(toSocketId).emit('candidate', candidate);
+    });
 });
+
 
 
 
