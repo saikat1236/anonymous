@@ -3,122 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Call with Strangers</title>
+    <title>Video Call</title>
     <style>
         video {
-            width: 45%;
-            margin: 10px;
-            border: 1px solid black;
+            width: 400px;
+            height: 300px;
+        }
+        #remoteVideo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Video Call with Strangers</h1>
-    <video id="localVideo" autoplay muted playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
+    <h1>Video Call with Stranger</h1>
+    
+    <div>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+
+    <button id="startCallBtn" disabled>Start Call</button>  <!-- Initially disabled -->
+    <button id="endCallBtn" style="display:none;">End Call</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-
-        const localVideo = document.getElementById("localVideo");
-        const remoteVideo = document.getElementById("remoteVideo");
+        // const socket = io("https://omegle-clone-isz1.onrender.com");
+        const startCallBtn = document.getElementById('startCallBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
 
         let localStream;
         let peerConnection;
+        let users = []; // Initialize the users array
 
-        const peerConnectionConfig = {
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302" }, // Public STUN server
-            ],
+        const config = {
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
         };
 
-        // Start the local video stream
-        async function startMedia() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-            } catch (err) {
-                console.error("Error accessing media devices:", err);
+        // Set up local video stream
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+            })
+            .catch(error => console.log(error));
+
+        // Start call button
+        startCallBtn.addEventListener('click', () => {
+            if (users.length > 1) {
+                isCaller = true;
+                startCall();
+            } else {
+                alert('No users available for a call');
             }
-        }
+        });
 
-        // Create a new RTCPeerConnection
-        function createPeerConnection(peerSocketId) {
-            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+        // End call button
+        endCallBtn.addEventListener('click', () => {
+            endCall();
+        });
 
-            // Add local tracks to the peer connection
-            localStream.getTracks().forEach((track) => {
+        // Start a new call
+        function startCall() {
+            peerConnection = new RTCPeerConnection(config);
+            peerConnection.addEventListener('icecandidate', handleIceCandidate);
+            peerConnection.addEventListener('track', handleTrack);
+
+            localStream.getTracks().forEach(track => {
                 peerConnection.addTrack(track, localStream);
             });
 
-            // Handle ICE candidates
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit("candidate", event.candidate, peerSocketId);
-                }
-            };
-
-            // Handle remote stream
-            peerConnection.ontrack = (event) => {
-                console.log("Remote stream received:", event.streams[0]);
-                remoteVideo.srcObject = event.streams[0];
-            };
-
-            return peerConnection;
+            peerConnection.createOffer()
+                .then(offer => {
+                    return peerConnection.setLocalDescription(offer);
+                })
+                .then(() => {
+                    socket.emit('offer', peerConnection.localDescription, users[1]); // Send to the second user (you can dynamically assign users)
+                })
+                .catch(error => console.log(error));
         }
 
-        // When a peer is found
-        socket.on("peerFound", (peerSocketId) => {
-            console.log("Peer found:", peerSocketId);
+        // Handle ICE Candidate
+        function handleIceCandidate(event) {
+            if (event.candidate) {
+                socket.emit('candidate', event.candidate, users[1]);
+            }
+        }
 
-            // Create a new peer connection
-            const pc = createPeerConnection(peerSocketId);
+        // Handle incoming media track
+        function handleTrack(event) {
+            remoteVideo.srcObject = event.streams[0];
+        }
 
-            // Create and send an offer
-            pc.createOffer()
-                .then((offer) => {
-                    pc.setLocalDescription(offer);
-                    socket.emit("offer", offer, peerSocketId);
-                })
-                .catch((err) => console.error("Error creating offer:", err));
-        });
+        // Handle offer from another peer
+        socket.on('offer', (offer, fromSocketId) => {
+            peerConnection = new RTCPeerConnection(config);
+            peerConnection.addEventListener('icecandidate', handleIceCandidate);
+            peerConnection.addEventListener('track', handleTrack);
 
-        // Handle incoming offer
-        socket.on("offer", (offer, fromSocketId) => {
-            console.log("Offer received from:", fromSocketId);
-
-            // Create a new peer connection
-            const pc = createPeerConnection(fromSocketId);
-
-            pc.setRemoteDescription(new RTCSessionDescription(offer))
-                .then(() => {
-                    // Create and send an answer
-                    return pc.createAnswer();
-                })
-                .then((answer) => {
-                    pc.setLocalDescription(answer);
-                    socket.emit("answer", answer, fromSocketId);
-                })
-                .catch((err) => console.error("Error handling offer:", err));
-        });
-
-        // Handle incoming answer
-        socket.on("answer", (answer) => {
-            console.log("Answer received");
-            peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-        });
-
-        // Handle incoming ICE candidates
-        socket.on("candidate", (candidate) => {
-            console.log("Candidate received:", candidate);
-            peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch((err) => {
-                console.error("Error adding ICE candidate:", err);
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
             });
+
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+                .then(() => peerConnection.createAnswer())
+                .then(answer => {
+                    return peerConnection.setLocalDescription(answer);
+                })
+                .then(() => {
+                    socket.emit('answer', peerConnection.localDescription, fromSocketId);
+                })
+                .catch(error => console.log(error));
         });
 
-        // Start media when the page loads
-        window.onload = startMedia;
+        // Handle answer from another peer
+        socket.on('answer', (answer) => {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                .catch(error => console.log(error));
+        });
+
+        // Handle ICE Candidate from another peer
+        socket.on('candidate', (candidate) => {
+            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                .catch(error => console.log(error));
+        });
+
+        // End the call
+        function endCall() {
+            peerConnection.close();
+            peerConnection = null;
+            localStream.getTracks().forEach(track => track.stop());
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+            startCallBtn.style.display = 'inline';
+            endCallBtn.style.display = 'none';
+        }
+
+        // Receive the list of connected users
+        socket.on('users', (userList) => {
+            users = userList;  // Update the users array with the connected users
+            console.log('Connected users:', users);
+
+            // Enable the "Start Call" button if there is at least one other user
+            if (users.length > 1) {
+                startCallBtn.disabled = false;  // Enable the button
+            } else {
+                startCallBtn.disabled = true;  // Disable the button if no other users
+            }
+        });
     </script>
 </body>
 </html>

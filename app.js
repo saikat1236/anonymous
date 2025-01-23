@@ -43,36 +43,31 @@ let connectedUsers = 0;
 // });
 
 // Socket.IO signaling
-let waitingUser = null; // Store a user waiting for a match
+let users = [];
 
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  users.push(socket.id);
 
-io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+    users = users.filter(user => user !== socket.id);
+  });
 
-    // Notify all users about this user
-    socket.broadcast.emit("peerFound", socket.id);
+  // Handle signaling messages
+  socket.on('offer', (offer, toSocketId) => {
+    io.to(toSocketId).emit('offer', offer, socket.id);
+  });
 
-    // Handle offer
-    socket.on("offer", (offer, toSocketId) => {
-        io.to(toSocketId).emit("offer", offer, socket.id);
-    });
+  socket.on('answer', (answer, toSocketId) => {
+    io.to(toSocketId).emit('answer', answer);
+  });
 
-    // Handle answer
-    socket.on("answer", (answer, toSocketId) => {
-        io.to(toSocketId).emit("answer", answer);
-    });
-
-    // Handle ICE candidate
-    socket.on("candidate", (candidate, toSocketId) => {
-        io.to(toSocketId).emit("candidate", candidate);
-    });
-
-    // Handle disconnection
-    socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.id}`);
-        socket.broadcast.emit("peerDisconnected", socket.id);
-    });
+  socket.on('candidate', (candidate, toSocketId) => {
+    io.to(toSocketId).emit('candidate', candidate);
+  });
 });
+
 
 
 
