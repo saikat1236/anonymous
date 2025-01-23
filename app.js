@@ -49,40 +49,28 @@ let waitingUser = null; // Store a user waiting for a match
 io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    // Match user with a stranger
-    if (waitingUser) {
-        // Notify both users that they've been matched
-        io.to(socket.id).emit("peerFound", waitingUser);
-        io.to(waitingUser).emit("peerFound", socket.id);
+    // Notify all users about this user
+    socket.broadcast.emit("peerFound", socket.id);
 
-        // Clear the waiting user
-        waitingUser = null;
-    } else {
-        // If no waiting user, make this user wait
-        waitingUser = socket.id;
-    }
-
-    // Handle WebRTC signaling messages
+    // Handle offer
     socket.on("offer", (offer, toSocketId) => {
         io.to(toSocketId).emit("offer", offer, socket.id);
     });
 
+    // Handle answer
     socket.on("answer", (answer, toSocketId) => {
         io.to(toSocketId).emit("answer", answer);
     });
 
+    // Handle ICE candidate
     socket.on("candidate", (candidate, toSocketId) => {
         io.to(toSocketId).emit("candidate", candidate);
     });
 
-    // Handle user disconnect
+    // Handle disconnection
     socket.on("disconnect", () => {
         console.log(`User disconnected: ${socket.id}`);
-
-        // Clear the waiting user if they disconnect
-        if (waitingUser === socket.id) {
-            waitingUser = null;
-        }
+        socket.broadcast.emit("peerDisconnected", socket.id);
     });
 });
 
