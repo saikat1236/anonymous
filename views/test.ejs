@@ -12,680 +12,113 @@
       type="/images/jpg"
       sizes="16x16"
     />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-
-    <link rel="stylesheet" href="/css/main.min.css" />
-    <link rel="stylesheet" href="/css/style.css" />
-    <link rel="stylesheet" href="/css/color.css" />
-    <link rel="stylesheet" href="/css/responsive.css" />
-    <link
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-    rel="stylesheet"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-    <style>
-        /* Add this to your existing <style> section in video-chat.ejs */
-        .online-users-counter {
-          position: fixed;
-          top: 5rem;
-          right: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background-color: rgba(0, 0, 0, 0.8);
-          backdrop-filter: blur(4px);
-          padding: 0.5rem 1rem;
-          border-radius: 9999px;
-          border: 2px solid rgb(139, 92, 246);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          z-index: 1000;
-        }
-  
-        .online-indicator {
-          width: 0.75rem;
-          height: 0.75rem;
-          border-radius: 9999px;
-          background-color: rgb(34, 197, 94);
-          animation: pulse 2s infinite;
-        }
-  
-        .online-count {
-          color: white;
-          font-weight: 600;
-        }
-  
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-  
-          50% {
-            opacity: 0.5;
-          }
-        }
-  
-        @keyframes countChange {
-          0% {
-            transform: scale(1);
-          }
-  
-          50% {
-            transform: scale(1.1);
-          }
-  
-          100% {
-            transform: scale(1);
-          }
-        }
-  
-        .count-animate {
-          animation: countChange 0.5s ease-out;
-        }
-  
-        .waiting-screen {
-          position: absolute;
-          inset: 0;
-          z-index: 50;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: rgba(0, 0, 0, 0.01);
-        }
-  
-        .waiting-text {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 15rem;
-          height: 3rem;
-          font-size: 1.2rem;
-          font-weight: bold;
-          color: white;
-          border-radius: 8rem;
-          animation: pulse 2s infinite;
-          background-color: #2196f3;
-        }
-  
-        .chat-container {
-          display: grid;
-          grid-template-rows: 3fr 1fr;
-          /* Video section takes 3 parts; chat takes 1 part */
-          height: 100vh;
-          overflow: hidden;
-        }
-  
-        @media (min-width: 1024px) {
-          .chat-container {
-            grid-template-columns: 3fr 1fr;
-            /* Video section takes 3 parts; chat takes 1 part */
-          }
-        }
-  
-        .video-section {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          background-color: black;
-          height: 85%;
-          margin: 1rem;
-          border-radius: 2rem;
-          outline: 2px solid rgb(167, 139, 250);
-        }
-  
-        #strangerVideo {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          max-height: 100%;
-          /* Prevent video from exceeding the container height */
-          max-width: 100%;
-          /* Prevent video from exceeding the container width */
-          border-radius: 2rem;
-          object-fit: cover;
-          outline: 2px solid rgb(167, 139, 250);
-        }
-  
-        #myVideo {
-          position: absolute;
-          bottom: 1rem;
-          right: 1rem;
-          width: 8rem;
-          height: 8rem;
-          background-color: rgb(243, 232, 255);
-          border-radius: 9999px;
-          object-fit: cover;
-          outline: 2px solid rgb(167, 139, 250);
-          transform: scaleX(-1);
-          /* Mirrors the video horizontally */
-        }
-  
-        @media (min-width: 1024px) {
-          #myVideo {
-            top: 2rem;
-            width: 10rem;
-            height: 10rem;
-            transform: scaleX(-1);
-            /* Mirrors the video horizontally */
-          }
-        }
-  
-        .chat-section {
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-          overflow-y: visible;
-          padding: 1rem;
-          /* background-color: white; */
-          /* border-top: 2px solid rgb(191, 219, 254); */
-        }
-  
-        @media (min-width: 1024px) {
-          .chat-section {
-            border-top: none;
-            /* border-left: 2px solid rgb(191, 219, 254); */
-            height: 45rem;
-          }
-        }
-  
-        .messages-container {
-          margin-bottom: 5rem;
-          max-height: calc(100% - 6rem);
-          overflow-y: auto;
-        }
-  
-        .input-container {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          display: flex;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          /* background-color: white; */
-          width: 100%;
-          /* box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); */
-        }
-  
-        @media (min-width: 1024px) {
-          .input-container {
-            width: 25%;
-            left: auto;
-            right: 0;
-          }
-        }
-  
-        .message-input {
-          flex: 1;
-          padding: 0.5rem 1rem;
-          font-size: 0.875rem;
-          border: 2px solid rgb(167, 139, 250);
-          border-radius: 1rem;
-        }
-  
-        .message-input:focus {
-          outline: none;
-        }
-  
-        .send-button {
-          padding: 0.5rem 1rem;
-          font-size: 0.875rem;
-          font-weight: bold;
-          color: white;
-          background-color: rgb(124, 58, 237);
-          border: 2px solid rgb(167, 139, 250);
-          border-radius: 0.5rem;
-          cursor: pointer;
-        }
-  
-        /* Floating Button Container */
-  
-        .header-container {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          /* Ensure it spans the full width */
-          padding: 0 20px;
-          height: 100px;
-          /* Set a consistent height for the header */
-        }
-  
-        .logo-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-  
-        .logo-container2 {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          background-color: #2196f3;
-          /* color: white; */
-          border-radius: 8px;
-          /* Smooth rounded corners */
-          width: 100px;
-          height: 50px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          cursor: pointer;
-          text-align: center;
-        }
-  
-        .logo-container2 a {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          text-decoration: none;
-          color: white;
-          /* Ensure consistent text color */
-          font-size: 16px;
-          font-weight: bold;
-        }
-  
-        .logo-container2 i {
-          font-size: 24px;
-          /* margin-top: 5px; */
-        }
-  
-        .logo-container2:hover {
-          transform: scale(1.05);
-          /* Slightly enlarge on hover */
-          box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-          background-color: #1976d2;
-          /* Darker shade for hover effect */
-        }
-  
-        .logo-container2:active {
-          transform: scale(0.95);
-          /* Slightly shrink on click */
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-  
-        @media (max-width: 768px) {
-          .logo-container2 {
-            width: 50px;
-            height: 50px;
-          }
-  
-          .logo-container2 a {
-            font-size: 14px;
-          }
-  
-          .logo-container2 i {
-            font-size: 20px;
-          }
-        }
-  
-        .center-text {
-          flex: 1;
-          text-align: center;
-          font-size: 6vw;
-          /* Larger text for header */
-          font-weight: semi-bold;
-          /* Make the text bold */
-          /* text-transform: uppercase; Make the text uppercase */
-          font-family: "Courier New", monospace;
-          color: transparent;
-          /* Make the text color transparent for the effect */
-          position: relative;
-          /* For positioning the light effect */
-          /* background-image: linear-gradient(90deg, #ffffff, #121212, #000000); Gradient for the light effect */
-          background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0) 50%,
-            #fff 50%
-          );
-          background-size: 200% 100%;
-          /* Make the gradient double the text size */
-          background-position: -100% 0;
-          /* Start the gradient from the left */
-  
-          -webkit-background-clip: text;
-          /* Webkit for compatibility */
-          background-clip: text;
-          /* Clip the background to the text */
-          animation: lightEffect 7s ease-in-out infinite;
-          /* Animation for the light effect */
-        }
-  
-        /* Keyframe animation for the light effect */
-        @keyframes lightEffect {
-          0% {
-            background-position: -100% 0;
-            /* Light starts from the left */
-          }
-  
-          50% {
-            background-position: 100% 0;
-            /* Light moves to the right */
-          }
-  
-          100% {
-            background-position: -100% 0;
-            /* Light returns to the left */
-          }
-        }
-      </style>
-    <style>
- 
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Container for video elements */
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            margin-bottom: 20px;
-        }
-
-        /* Local video styling */
-        #remoteVideo {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        /* Remote video styling */
-        #localVideo {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30%;
-            max-width: 300px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        /* Buttons styling */
-        button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 18px;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            width: 100%;
-            max-width: 200px;
-            margin: 10px auto;
-        }
-
-        button:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        /* Hide the End call button initially */
-        #endCallBtn {
-            display: none;
-        }
-
-        /* Media Query for mobile responsiveness */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            .video-container {
-                margin-bottom: 15px;
-            }
-
-            #remoteVideo {
-                max-width: 100%;
-                width: 100%;
-            }
-
-            #localVideo {
-                width: 40%;
-                top: 10px;
-                right: 10px;
-            }
-
-            button {
-                width: 100%;
-                font-size: 16px;
-                padding: 10px 20px;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="theme-layout">
-        <div class="postoverlay"></div>
-        <!-- <div class="responsive-header">
-              <div class="mh-head first Sticky">
-                  <div class="header-container">
-                      <span class="logo-container">
-                          <img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;">
-                          <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/"
-                                  style="color: aqua;"> Saikat</a></p>
-                      </span>
-                      <span class="center-text">unknowns</span>
-                      <span class="logo-container2">
-                          <a href="/video-chat"
-                              style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
-                              <i class="material-icons">video_call</i>
-                          </a>
-                      </span>
-                  </div>
-              </div>
-          </div>
-          <div class="topbar stick">
-              <div class="logo">
-                  <a title="" href="/"><img src="/images/log-modified.jpg" alt="" style="height: 60px; min-width: 60px;"
-                          class="center"></a>
-                  <p style="font-size: 10px;">developed by<a href="https://saikat-biswas.vercel.app/" style="color: aqua;"> Saikat</a>
-                  </p>
-              </div>
-              <span class="center-text">unknowns</span>
-              <div class="logo-container2">
-                  <a href="/video-chat"
-                      style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
-                      <i class="material-icons">video_call</i>
-                  </a>
-              </div>
-          </div> -->
-        <div class="first Sticky" style="background-color: black">
-          <div class="header-container">
-            <span class="logo-container">
-              <a href="/">
-                <img
-                  src="/images/log-modified.jpg"
-                  alt=""
-                  style="height: 60px; min-width: 60px"
-                />
-              </a>
-              <p style="font-size: 10px">
-                developed by<a
-                  href="https://saikat-biswas.vercel.app/"
-                  style="color: aqua"
-                >
-                  Saikat</a
-                >
-              </p>
-            </span>
-            <span class="center-text">unknowns</span>
-  
-            <!-- Video End (Splash) Button -->
-            <button
-              id="disconnectButton"
-              class="logo-container2"
-              style="background-color: red; margin-right: 10px"
-            >
-              <i class="fas fa-video-slash"></i>
-              <!-- Video end icon -->
-            </button>
-  
-            <button
-              id="newChatButton"
-              class="logo-container2"
-              style="background-color: rgb(56, 56, 237)"
-            >
-              <i class="fas fa-video"></i>
-              <!-- New video call icon -->
-            </button>
-  
-            <!-- <span class="logo-container2" id="newChatButton">
-  
-    
-                      <a href="/video-chat"
-                          style="color: aliceblue; display: flex; align-items: center; text-decoration: none;">
-                          <p style="margin: 0;font-size: 1.2rem;" >New chat</p>
-   
-                      </a>
-                  </span> -->
-            <div class="online-users-counter">
-              <div class="online-indicator"></div>
-              <span class="online-count" id="room-size">0 online</span>
-            </div>
-          </div>
-        </div>
+    <h1>Video Call with Strangers</h1>
+    <video id="localVideo" autoplay muted playsinline></video>
+    <video id="remoteVideo" autoplay playsinline></video>
 
-    <div class="video-container">
-        <video id="remoteVideo" autoplay playsinline></video>
-        <video id="localVideo" autoplay playsinline muted></video>
-    </div>
-
-    <button id="startCallBtn" disabled>Start Call</button>
-    <button id="endCallBtn">End Call</button>
-</div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const startCallBtn = document.getElementById('startCallBtn');
-        const endCallBtn = document.getElementById('endCallBtn');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
+
+        const localVideo = document.getElementById("localVideo");
+        const remoteVideo = document.getElementById("remoteVideo");
+
+        const peerConnectionConfig = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+            ],
+        };
 
         let localStream;
         let peerConnection;
-        let users = []; 
 
-        const config = {
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-        };
-
-        // Set up local video stream
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then(stream => {
-                localStream = stream;
-                localVideo.srcObject = stream;
-            })
-            .catch(error => console.log(error));
-
-        // Start call button
-        startCallBtn.addEventListener('click', () => {
-            if (users.length > 1) {
-                startCall();
-            } else {
-                alert('No users available for a call');
+        // Access the webcam and microphone
+        async function startMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+            } catch (err) {
+                console.error("Error accessing media devices.", err);
             }
-        });
+        }
 
-        // End call button
-        endCallBtn.addEventListener('click', () => {
-            endCall();
-        });
+        // Handle peer found
+        socket.on("peerFound", (peerSocketId) => {
+            console.log("Peer found:", peerSocketId);
 
-        // Start a new call
-        function startCall() {
-            peerConnection = new RTCPeerConnection(config);
-            peerConnection.addEventListener('icecandidate', handleIceCandidate);
-            peerConnection.addEventListener('track', handleTrack);
+            // Create a WebRTC connection
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
 
-            localStream.getTracks().forEach(track => {
+            // Add local tracks to the connection
+            localStream.getTracks().forEach((track) => {
                 peerConnection.addTrack(track, localStream);
             });
 
-            peerConnection.createOffer()
-                .then(offer => {
-                    return peerConnection.setLocalDescription(offer);
-                })
-                .then(() => {
-                    socket.emit('offer', peerConnection.localDescription, users[1]);
-                })
-                .catch(error => console.log(error));
-        }
+            // Handle ICE candidates
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit("candidate", event.candidate, peerSocketId);
+                }
+            };
 
-        // Handle ICE Candidate
-        function handleIceCandidate(event) {
-            if (event.candidate) {
-                socket.emit('candidate', event.candidate, users[1]);
-            }
-        }
+            // Handle remote stream
+            peerConnection.ontrack = (event) => {
+                remoteVideo.srcObject = event.streams[0];
+            };
 
-        // Handle incoming media track
-        function handleTrack(event) {
-            remoteVideo.srcObject = event.streams[0];
-        }
+            // Create and send an offer
+            peerConnection.createOffer().then((offer) => {
+                peerConnection.setLocalDescription(offer);
+                socket.emit("offer", offer, peerSocketId);
+            });
+        });
 
-        // Handle offer from another peer
-        socket.on('offer', (offer, fromSocketId) => {
-            peerConnection = new RTCPeerConnection(config);
-            peerConnection.addEventListener('icecandidate', handleIceCandidate);
-            peerConnection.addEventListener('track', handleTrack);
+        // Handle incoming offer
+        socket.on("offer", (offer, fromSocketId) => {
+            console.log("Offer received:", fromSocketId);
 
-            localStream.getTracks().forEach(track => {
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+
+            // Add local tracks to the connection
+            localStream.getTracks().forEach((track) => {
                 peerConnection.addTrack(track, localStream);
             });
 
-            peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
-                .then(() => peerConnection.createAnswer())
-                .then(answer => {
-                    return peerConnection.setLocalDescription(answer);
-                })
-                .then(() => {
-                    socket.emit('answer', peerConnection.localDescription, fromSocketId);
-                })
-                .catch(error => console.log(error));
+            // Handle ICE candidates
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit("candidate", event.candidate, fromSocketId);
+                }
+            };
+
+            // Handle remote stream
+            peerConnection.ontrack = (event) => {
+                remoteVideo.srcObject = event.streams[0];
+            };
+
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+            // Create and send an answer
+            peerConnection.createAnswer().then((answer) => {
+                peerConnection.setLocalDescription(answer);
+                socket.emit("answer", answer, fromSocketId);
+            });
         });
 
-        // Handle answer from another peer
-        socket.on('answer', (answer) => {
-            peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
-                .catch(error => console.log(error));
+        // Handle incoming answer
+        socket.on("answer", (answer) => {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
         });
 
-        // Handle ICE Candidate from another peer
-        socket.on('candidate', (candidate) => {
-            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                .catch(error => console.log(error));
+        // Handle incoming ICE candidates
+        socket.on("candidate", (candidate) => {
+            peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
         });
 
-        // End the call
-        function endCall() {
-            peerConnection.close();
-            peerConnection = null;
-            localStream.getTracks().forEach(track => track.stop());
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
-            startCallBtn.style.display = 'inline';
-            endCallBtn.style.display = 'none';
-        }
-
-        // Receive the list of connected users
-        socket.on('users', (userList) => {
-            users = userList;  
-            if (users.length > 1) {
-                startCallBtn.disabled = false;  // Enable the button
-            } else {
-                startCallBtn.disabled = true;  // Disable the button if no other users
-            }
-        });
+        // Start media when the page loads
+        window.onload = startMedia;
     </script>
 </body>
 </html>
