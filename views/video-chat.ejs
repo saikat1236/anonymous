@@ -577,93 +577,148 @@
       const sendButton = document.getElementById("sendButton");
 
       async function initializeLocalStream() {
-        // Check if the browser supports media devices
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            // Request the local media stream (audio and video)
-            localStream = await navigator.mediaDevices.getUserMedia({
-              video: true,
-              audio: true,
-            });
-            console.log("Local stream obtained:", localStream);
-            peer = new RTCPeerConnection(configuration);
+  // Check if the browser supports media devices
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      // Request the local media stream (audio and video)
+      localStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      console.log("Local stream obtained:", localStream);
 
-            // Add tracks to the peer connection only once
-            if (!tracksAdded) {
-              localStream.getTracks().forEach((track) => {
-                console.log("Adding track1:", track);
-                peer.addTrack(track, localStream);
-              });
-              tracksAdded = true; // Set the flag after adding tracks
-            }
+      // Initialize peer connection
+      peer = new RTCPeerConnection(configuration);
 
-            const offer = await peer.createOffer();
-            await peer.setLocalDescription(offer);
-            // sendOfferToRemotePeer(offer);
+      // Setup the ontrack event handler
+      peer.ontrack = (event) => {
+        console.log("Received track event:", event);
+        // Check if the stream exists and has tracks
+        if (event.streams && event.streams[0]) {
+          const remoteStream = event.streams[0];
+          console.log("Remote stream:", remoteStream);
 
-            // Set the local stream to the myVideo element
-            myVideo.srcObject = localStream;
+          // Check if video or audio tracks are present
+          const hasVideo = remoteStream.getVideoTracks().length > 0;
+          const hasAudio = remoteStream.getAudioTracks().length > 0;
 
-            // Initialize the peer connection after obtaining the local stream
-            // peer = new RTCPeerConnection(configuration);
+          if (hasVideo) {
+            console.log(
+              "Video track found:",
+              remoteStream.getVideoTracks()[0]
+            );
+          } else {
+            console.log("No video track found in remote stream.");
+            triggerFallback();
+          }
 
-            peer.ontrack = (event) => {
-              console.log("Received track event:", event);
-              // Check if the stream exists and has tracks
-              if (event.streams && event.streams[0]) {
-                const remoteStream = event.streams[0];
-                console.log("Remote stream:", remoteStream);
+          if (hasAudio) {
+            console.log(
+              "Audio track found:",
+              remoteStream.getAudioTracks()[0]
+            );
+          } else {
+            console.log("No audio track found in remote stream.");
+            triggerFallback();
+          }
 
-                // Check if video or audio tracks are present
-                const hasVideo = remoteStream.getVideoTracks().length > 0;
-                const hasAudio = remoteStream.getAudioTracks().length > 0;
-
-                if (hasVideo) {
-                  console.log(
-                    "Video track found:",
-                    remoteStream.getVideoTracks()[0]
-                  );
-                } else {
-                  console.log("No video track found in remote stream.");
-                }
-
-                if (hasAudio) {
-                  console.log(
-                    "Audio track found:",
-                    remoteStream.getAudioTracks()[0]
-                  );
-                } else {
-                  console.log("No audio track found in remote stream.");
-                }
-
-                // Set the remote stream to the video element
-                const strangerVideo = document.getElementById("strangerVideo");
-                if (strangerVideo) {
-                  strangerVideo.srcObject = remoteStream;
-                  console.log("Set remote stream to video element.");
-                } else {
-                  console.error("strangerVideo element not found!");
-                }
-              } else {
-                console.error("No remote stream found in event:", event);
-              }
-            };
-
-            // // Add tracks to the peer connection only once
-            // if (!tracksAdded) {
-            //   localStream.getTracks().forEach((track) => {
-            //     console.log("Adding track1:", track);
-            //     peer.addTrack(track, localStream);
-            //   });
-            //   tracksAdded = true; // Set the flag after adding tracks
-            // }
-          } catch (err) {
-            console.error("Error accessing media devices:", err);
+          // Set the remote stream to the video element
+          const strangerVideo = document.getElementById("strangerVideo");
+          if (strangerVideo) {
+            strangerVideo.srcObject = remoteStream;
+            console.log("Set remote stream to video element.");
+          } else {
+            console.error("strangerVideo element not found!");
           }
         } else {
-          console.error("Media devices not supported in this browser.");
+          console.error("No remote stream found in event:", event);
+          triggerFallback();
         }
+      };
+
+      // Add tracks to the peer connection only once
+      if (!tracksAdded) {
+        localStream.getTracks().forEach((track) => {
+          console.log("Adding track1:", track);
+          peer.addTrack(track, localStream);
+        });
+        tracksAdded = true; // Set the flag after adding tracks
       }
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+
+      // Send offer to remote peer (not shown in the code)
+
+      // Set the local stream to the myVideo element
+      const myVideo = document.getElementById("myVideo");
+      myVideo.srcObject = localStream;
+
+      // Initialize the peer connection after obtaining the local stream
+      // peer.ontrack = (event) => {
+      //   console.log("Received track event:", event);
+      //   // Check if the stream exists and has tracks
+      //   if (event.streams && event.streams[0]) {
+      //     const remoteStream = event.streams[0];
+      //     console.log("Remote stream:", remoteStream);
+
+      //     // Check if video or audio tracks are present
+      //     const hasVideo = remoteStream.getVideoTracks().length > 0;
+      //     const hasAudio = remoteStream.getAudioTracks().length > 0;
+
+      //     if (hasVideo) {
+      //       console.log("Video track found:", remoteStream.getVideoTracks()[0]);
+      //     } else {
+      //       console.log("No video track found in remote stream.");
+      //       triggerFallback();
+      //     }
+
+      //     if (hasAudio) {
+      //       console.log("Audio track found:", remoteStream.getAudioTracks()[0]);
+      //     } else {
+      //       console.log("No audio track found in remote stream.");
+      //       triggerFallback();
+      //     }
+
+      //     // Set the remote stream to the video element
+      //     const strangerVideo = document.getElementById("strangerVideo");
+      //     if (strangerVideo) {
+      //       strangerVideo.srcObject = remoteStream;
+      //       console.log("Set remote stream to video element.");
+      //     } else {
+      //       console.error("strangerVideo element not found!");
+      //     }
+      //   } else {
+      //     console.error("No remote stream found in event:", event);
+      //     triggerFallback();
+      //   }
+      // };
+
+      // Fallback function to retry connection or handle missing tracks
+      function triggerFallback() {
+        console.error("Remote video/audio not found. Attempting renegotiation...");
+        // Retry logic or renegotiation
+        setTimeout(async () => {
+          // Try renegotiating the connection
+          try {
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            console.log("Renegotiation initiated.");
+            // Send the offer to the remote peer (add your signaling logic here)
+          } catch (err) {
+            console.error("Renegotiation failed:", err);
+          }
+        }, 5000); // Retry after 5 seconds
+      }
+
+    } catch (err) {
+      console.error("Error accessing media devices:", err);
+    }
+  } else {
+    console.error("Media devices not supported in this browser.");
+  }
+}
+
 
       // Call this function to initialize the local stream
       initializeLocalStream();
@@ -832,6 +887,19 @@
           console.error("Error handling SDP:", error);
         }
       });
+
+//       peer.onconnectionstatechange = () => {
+//   console.log("Connection state:", peer.connectionState);
+//   if (peer.connectionState === "failed") {
+//     console.error("Connection failed. Restarting...");
+//     restartConnection();
+//   }
+// };
+
+// peer.oniceconnectionstatechange = () => {
+//   console.log("ICE state:", peer.iceConnectionState);
+// };
+
 
       // Handle incoming messages
       socket.on("get-message", (input) => {
