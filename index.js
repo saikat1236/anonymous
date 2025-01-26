@@ -11,6 +11,11 @@ dotenv.config({ path: "config.env" });
 
 const app = express();
 const port = process.env.PORT || 3000;
+// const port = 3001;
+
+app.get('/', (req, res) => {
+    res.send('Hello World');
+  });
 
 // Create an HTTP server
 const server = http.createServer(app);
@@ -106,6 +111,12 @@ app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
 app.use('/images', express.static(path.resolve(__dirname, "assets/images")));
 app.use('/fonts', express.static(path.resolve(__dirname, "assets/fonts")));
 app.use('/includes', express.static(path.resolve(__dirname, "views/includes")));
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+  });
+  
 
 // Routes
 app.use('/', require('./server/routes/router'));
