@@ -639,7 +639,6 @@
         // Handle incoming tracks
         peer.ontrack = (event) => {
           console.log("Received track event:", event);
-
           // Check if the stream exists and has tracks
           if (event.streams && event.streams[0]) {
             const remoteStream = event.streams[0];
@@ -678,16 +677,15 @@
           } else {
             console.error("No remote stream found in event:", event);
           }
-
-        //   // Additional log for RTCTrackEvent properties (optional)
-        //   console.log("Track kind:", event.track.kind); // 'audio' or 'video'
-        //   console.log("Track label:", event.track.label); // Track label (e.g., 'audio' or 'video')
-        //   console.log("Track ID:", event.track.id); // Track ID
-        //   console.log("Track enabled:", event.track.enabled); // Whether the track is enabled
-        //   console.log("Track readyState:", event.track.readyState);
         };
 
+        peer.onaddstream = (event) => {
+    console.log("Received legacy stream:", event);
+    strangerVideo.srcObject = event.stream;
+};
+
         // Handle ICE candidates
+        setTimeout(() => {
         peer.onicecandidate = (e) => {
           if (e.candidate) {
             console.log("Generated ICE candidate:", e.candidate);
@@ -697,6 +695,7 @@
             });
           }
         };
+      }, 5000);
 
         // If we're p1, create and send the offer
         if (type === "p1") {
