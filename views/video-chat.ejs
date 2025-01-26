@@ -679,13 +679,13 @@
           }
         };
 
-        peer.onaddstream = (event) => {
-    console.log("Received legacy stream:", event);
-    strangerVideo.srcObject = event.stream;
-};
+//         peer.onaddstream = (event) => {
+//     console.log("Received legacy stream:", event);
+//     strangerVideo.srcObject = event.stream;
+// };
 
         // Handle ICE candidates
-        setTimeout(() => {
+        // setTimeout(() => {
         peer.onicecandidate = (e) => {
           if (e.candidate) {
             console.log("Generated ICE candidate:", e.candidate);
@@ -695,7 +695,7 @@
             });
           }
         };
-      }, 5000);
+      // }, 5000);
 
         // If we're p1, create and send the offer
         if (type === "p1") {
