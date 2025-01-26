@@ -561,6 +561,11 @@
           { urls: "stun:stun2.l.google.com:19302" },
           { urls: "stun:stun3.l.google.com:19302" },
           { urls: "stun:stun4.l.google.com:19302" },
+          {
+            urls: "turn:my-turn-server.mycompany.com:19302",
+            username: "optional-username",
+            credential: "auth-token",
+          },
         ],
       };
 
@@ -581,11 +586,6 @@
               audio: true,
             });
             console.log("Local stream obtained:", localStream);
-
-            // Set the local stream to the myVideo element
-            myVideo.srcObject = localStream;
-
-            // Initialize the peer connection after obtaining the local stream
             peer = new RTCPeerConnection(configuration);
 
             // Add tracks to the peer connection only once
@@ -596,6 +596,67 @@
               });
               tracksAdded = true; // Set the flag after adding tracks
             }
+
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            // sendOfferToRemotePeer(offer);
+
+            // Set the local stream to the myVideo element
+            myVideo.srcObject = localStream;
+
+            // Initialize the peer connection after obtaining the local stream
+            // peer = new RTCPeerConnection(configuration);
+
+            peer.ontrack = (event) => {
+              console.log("Received track event:", event);
+              // Check if the stream exists and has tracks
+              if (event.streams && event.streams[0]) {
+                const remoteStream = event.streams[0];
+                console.log("Remote stream:", remoteStream);
+
+                // Check if video or audio tracks are present
+                const hasVideo = remoteStream.getVideoTracks().length > 0;
+                const hasAudio = remoteStream.getAudioTracks().length > 0;
+
+                if (hasVideo) {
+                  console.log(
+                    "Video track found:",
+                    remoteStream.getVideoTracks()[0]
+                  );
+                } else {
+                  console.log("No video track found in remote stream.");
+                }
+
+                if (hasAudio) {
+                  console.log(
+                    "Audio track found:",
+                    remoteStream.getAudioTracks()[0]
+                  );
+                } else {
+                  console.log("No audio track found in remote stream.");
+                }
+
+                // Set the remote stream to the video element
+                const strangerVideo = document.getElementById("strangerVideo");
+                if (strangerVideo) {
+                  strangerVideo.srcObject = remoteStream;
+                  console.log("Set remote stream to video element.");
+                } else {
+                  console.error("strangerVideo element not found!");
+                }
+              } else {
+                console.error("No remote stream found in event:", event);
+              }
+            };
+
+            // // Add tracks to the peer connection only once
+            // if (!tracksAdded) {
+            //   localStream.getTracks().forEach((track) => {
+            //     console.log("Adding track1:", track);
+            //     peer.addTrack(track, localStream);
+            //   });
+            //   tracksAdded = true; // Set the flag after adding tracks
+            // }
           } catch (err) {
             console.error("Error accessing media devices:", err);
           }
@@ -679,10 +740,10 @@
           }
         };
 
-//         peer.onaddstream = (event) => {
-//     console.log("Received legacy stream:", event);
-//     strangerVideo.srcObject = event.stream;
-// };
+        //         peer.onaddstream = (event) => {
+        //     console.log("Received legacy stream:", event);
+        //     strangerVideo.srcObject = event.stream;
+        // };
 
         // Handle ICE candidates
         // setTimeout(() => {
@@ -695,7 +756,7 @@
             });
           }
         };
-      // }, 5000);
+        // }, 5000);
 
         // If we're p1, create and send the offer
         if (type === "p1") {
